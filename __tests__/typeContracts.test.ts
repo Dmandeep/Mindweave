@@ -144,13 +144,15 @@ describe('TypeScript Type Contracts', () => {
     expect(validMethods).toContain(assessment.assessmentMethod);
   });
 
-  it('Investigation interface enforces valid stages', () => {
+  it('Investigation interface enforces valid stages and outcomes', () => {
     const stages: InvestigationStage[] = [
       'hypothesis', 'design', 'execution', 'evaluation', 'completed',
     ];
-    const outcomes: InvestigationOutcome[] = ['supported', 'refuted', 'inconclusive'];
+    const outcomes: InvestigationOutcome[] = [
+      'supported', 'partially_supported', 'refuted', 'inconclusive', 'not_completed',
+    ];
 
     expect(stages.length).toBe(5);
-    expect(outcomes.length).toBe(3);
+    expect(outcomes.length).toBe(5);
   });
 });

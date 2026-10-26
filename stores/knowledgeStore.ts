@@ -384,6 +384,7 @@ export const useKnowledgeStore = create<KnowledgeState>()(
       experimentPlan: {
         id: `plan-${Date.now()}`,
         title: 'Empirical Benchmark Protocol',
+        objective: 'Empirically verify consistency invariant under partition decay bounds',
         methodology: 'Simulate network partition during concurrent read operations; measure stale read frequency vs signal lease expiry.',
         successCriteria: [
           {
@@ -467,8 +468,22 @@ export const useKnowledgeStore = create<KnowledgeState>()(
     if (!inv) return;
 
     const discovery = get().discoveryCandidates.find((d) => d.id === inv.discoveryId);
-    const newStatus: RelationshipStatus = outcome === 'supported' ? 'accepted' : 'rejected';
-    const confidence = outcome === 'supported' ? 0.85 : 0.20;
+    let newStatus: RelationshipStatus = 'proposed';
+    let confidence = 0.50;
+
+    if (outcome === 'supported') {
+      newStatus = 'accepted';
+      confidence = 0.88;
+    } else if (outcome === 'partially_supported') {
+      newStatus = 'accepted';
+      confidence = 0.65;
+    } else if (outcome === 'refuted') {
+      newStatus = 'rejected';
+      confidence = 0.15;
+    } else if (outcome === 'inconclusive') {
+      newStatus = 'disputed';
+      confidence = 0.40;
+    }
 
     let updatedRelationships = [...get().relationships];
 

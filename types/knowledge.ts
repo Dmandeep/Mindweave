@@ -44,8 +44,10 @@ export type InvestigationStage =
 
 export type InvestigationOutcome = 
   | 'supported' 
+  | 'partially_supported'
   | 'refuted' 
-  | 'inconclusive';
+  | 'inconclusive'
+  | 'not_completed';
 
 export interface Source {
   id: string;
@@ -148,13 +150,30 @@ export interface SuccessCriterion {
   operator: 'gte' | 'lte' | 'equals' | 'contains';
 }
 
+export interface StructuredHypothesis {
+  id: string;
+  statement: string;
+  rationale: string;
+  assumptions: string[];
+  falsificationConditions: string[];
+  counterarguments?: string[];
+  confidence: number;
+}
+
 export interface ExperimentPlan {
   id: string;
   title: string;
+  objective?: string;
   methodology: string;
+  experimentType?: 'computational_simulation' | 'literature_meta_analysis' | 'empirical_bench' | 'observational_correlate';
+  requiredResources?: string[];
   successCriteria: SuccessCriterion[];
+  potentialLimitations?: string;
+  safetyConsiderations?: string;
   observations?: string;
+  evidenceRecords?: EvidenceRecord[];
   outcome?: InvestigationOutcome;
+  outcomeRationale?: string;
   completedAt?: string;
 }
 
@@ -164,10 +183,13 @@ export interface Investigation {
   discoveryId?: string;
   title: string;
   summary: string;
+  researchQuestion?: string;
   stage: InvestigationStage;
   hypothesisStatement: string;
   assumptions: string[];
+  structuredHypothesis?: StructuredHypothesis;
   experimentPlan: ExperimentPlan;
+  conceptIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
