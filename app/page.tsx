@@ -31,11 +31,13 @@ export default function Home() {
         {/* Left Column: Nav Sidebar */}
         <NavSidebar />
 
-        {/* Center Canvas / Workspaces */}
+        {/* Center Canvas / Workspaces with Smooth Cinematic Transition */}
         <main className="flex-1 relative overflow-hidden flex flex-col h-full min-h-0 w-full bg-surface-base">
-          {viewMode === 'universe' && <KnowledgeCanvas />}
-          {viewMode === 'discoveries' && <DiscoveriesWorkspace />}
-          {viewMode === 'lab' && <DiscoveryLabWorkbench />}
+          <div key={viewMode} className="w-full h-full flex-1 flex flex-col min-h-0 animate-workspace-enter">
+            {viewMode === 'universe' && <KnowledgeCanvas />}
+            {viewMode === 'discoveries' && <DiscoveriesWorkspace />}
+            {viewMode === 'lab' && <DiscoveryLabWorkbench />}
+          </div>
         </main>
 
         {/* Right Column: Contextual Inspector Panel */}

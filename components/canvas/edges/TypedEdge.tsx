@@ -37,13 +37,19 @@ export const TypedEdge = memo(({
   });
 
   const isProposed = relationship?.status === 'proposed';
-  const strokeWidth = isSelected ? 2.8 : isProposed ? 2 : 1.6;
+  const strokeWidth = isSelected ? 2.8 : isProposed ? 2.2 : 1.6;
 
   const strokeColor = isSelected 
     ? '#315FE9' 
     : isProposed 
     ? '#E97942' 
     : 'rgba(37, 37, 37, 0.45)';
+
+  const photonColor = isSelected 
+    ? '#315FE9' 
+    : isProposed 
+    ? '#E97942' 
+    : '#315FE9';
 
   const strokeStyle = {
     ...style,
@@ -64,6 +70,21 @@ export const TypedEdge = memo(({
         markerEnd={markerEnd}
         className={isSelected || isProposed ? 'animate-edge-flow' : undefined}
       />
+
+      {/* Traveling Energy Pulse Node along the Edge */}
+      <circle 
+        r={isSelected ? 3.5 : 2.5} 
+        fill={photonColor} 
+        filter="drop-shadow(0 0 4px currentColor)"
+        opacity={isSelected ? 1 : 0.75}
+      >
+        <animateMotion
+          path={edgePath}
+          dur={isSelected ? "1.8s" : isProposed ? "2.2s" : "3.5s"}
+          repeatCount="indefinite"
+        />
+      </circle>
+
       <EdgeLabelRenderer>
         <div
           style={{

@@ -20,7 +20,7 @@ interface Particle {
 
 export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forcePlay = false }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [phase, setPhase] = useState<'name' | 'logo' | 'exit'>('name');
+  const [phase, setPhase] = useState<'name' | 'weave' | 'logo' | 'exit'>('name');
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -61,15 +61,15 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
     window.addEventListener('resize', handleResize);
 
     const colors = ['#315FE9', '#E97942', '#252525', '#315FE9'];
-    const particleCount = Math.min(50, Math.floor((width * height) / 22000));
+    const particleCount = Math.min(55, Math.floor((width * height) / 20000));
     const particles: Particle[] = [];
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
         radius: Math.random() * 2 + 1,
         alpha: Math.random() * 0.5 + 0.25,
         color: colors[Math.floor(Math.random() * colors.length)],
@@ -86,11 +86,11 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          if (dist < 130) {
+          if (dist < 135) {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(37, 37, 37, ${0.12 * (1 - dist / 130)})`;
+            ctx.strokeStyle = `rgba(37, 37, 37, ${0.14 * (1 - dist / 135)})`;
             ctx.lineWidth = 0.75;
             ctx.stroke();
           }
@@ -153,7 +153,7 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
     setProgress(0);
 
     const startTime = Date.now();
-    const totalDuration = 3800; // 3.8s total cinematic duration
+    const totalDuration = 4200; // 4.2s total rich cinematic duration
 
     const progressInterval = setInterval(() => {
       const elapsed = Date.now() - startTime;
@@ -161,12 +161,17 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
       setProgress(pct);
     }, 40);
 
-    // Sequence step 1: Name reveal -> Step 2: Transition to Logo at 1.8s
+    // Sequence 1 -> 2: Name -> The Weave at 1.5s
+    const tWeave = setTimeout(() => {
+      setPhase('weave');
+    }, 1500);
+
+    // Sequence 2 -> 3: The Weave -> 3D Logo at 2.8s
     const tLogo = setTimeout(() => {
       setPhase('logo');
-    }, 1800);
+    }, 2800);
 
-    // Sequence step 2: Logo showcase -> Step 3: Dissolve to Main Page at 3.8s
+    // Sequence 3 -> 4: Exit & Push-Through into Workspace at 4.2s
     const tExit = setTimeout(() => {
       setPhase('exit');
       handleFinish();
@@ -181,6 +186,7 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
 
     return () => {
       clearInterval(progressInterval);
+      clearTimeout(tWeave);
       clearTimeout(tLogo);
       clearTimeout(tExit);
       window.removeEventListener('keydown', handleKeyDown);
@@ -192,11 +198,11 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
   return (
     <div
       role="region"
-      aria-label="MindWeave Signature Cinematic Entrance"
+      aria-label="MindWeave Cinematic Tapestry Entrance"
       className={`
         fixed inset-0 z-50 flex items-center justify-center bg-[#FAF7F0] overflow-hidden select-none
         transition-all duration-700 ease-out
-        ${isFadingOut ? 'opacity-0 scale-105 pointer-events-none filter blur-sm' : 'opacity-100 scale-100 filter-none'}
+        ${isFadingOut ? 'opacity-0 scale-105 pointer-events-none filter blur-md' : 'opacity-100 scale-100 filter-none'}
       `}
     >
       {/* Dynamic Background Canvas VFX */}
@@ -205,14 +211,14 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
         className="absolute inset-0 pointer-events-none z-0" 
       />
 
-      {/* Atmospheric Radial Light Blooms (Cinematic Lighting) */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-royal/10 blur-3xl pointer-events-none animate-pulse-glow" />
+      {/* Atmospheric Ambient Lighting Blooms */}
+      <div className="absolute -top-36 -left-36 w-[420px] h-[420px] rounded-full bg-royal/12 blur-3xl pointer-events-none animate-pulse-glow" />
       <div 
-        className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-tangerine/12 blur-3xl pointer-events-none animate-pulse-glow" 
-        style={{ animationDelay: '1.5s' }}
+        className="absolute -bottom-36 -right-36 w-[420px] h-[420px] rounded-full bg-tangerine/14 blur-3xl pointer-events-none animate-pulse-glow" 
+        style={{ animationDelay: '1.8s' }}
       />
 
-      {/* Subtle Dot Grid Texture */}
+      {/* Subtle Dot Grid Canvas Backdrop */}
       <div 
         className="absolute inset-0 pointer-events-none opacity-30 z-0"
         style={{
@@ -221,7 +227,7 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
         }}
       />
 
-      {/* Sleek Cinematic Skip Button with Radial Progress Ring */}
+      {/* Sleek Cinematic Skip Button with Progress Ring */}
       <button
         onClick={handleFinish}
         className="absolute top-6 right-8 z-30 group flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-[#FCFAF5]/90 backdrop-blur-md border border-ink/15 shadow-card hover:border-royal/50 hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-royal/40"
@@ -259,15 +265,15 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
         </div>
       </button>
 
-      {/* Central Cinematic Stage */}
-      <div className="relative z-10 w-full max-w-2xl px-6 flex flex-col items-center justify-center text-center">
+      {/* Central Cinematic Arena */}
+      <div className="relative z-10 w-full max-w-3xl px-6 flex flex-col items-center justify-center text-center">
 
         {/* ══════════════════════════════════════════════════════════════════
-            STAGE 1: CINEMATIC NAME ANIMATION
+            STAGE 1: CINEMATIC NAME ANIMATION (0s - 1.5s)
            ══════════════════════════════════════════════════════════════════ */}
         <div
           className={`
-            flex flex-col items-center justify-center transition-all duration-700 ease-out
+            flex flex-col items-center justify-center transition-all duration-600 ease-out
             ${phase === 'name' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-8 pointer-events-none absolute'}
           `}
         >
@@ -279,18 +285,18 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
             </span>
           </div>
 
-          {/* Staggered Letter-by-Letter Cinematic Title */}
+          {/* Staggered Cinematic Typography */}
           <h1 className="text-6xl sm:text-7xl font-extrabold tracking-tight font-sans text-ink leading-none flex items-center justify-center">
-            {/* Mind with metallic reflection */}
+            {/* Mind with Specular Shimmer */}
             <span className="inline-block tracking-tight text-ink relative">
               Mind
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent bg-clip-text text-transparent animate-shimmer pointer-events-none" />
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent bg-clip-text text-transparent animate-shimmer pointer-events-none" />
             </span>
 
-            {/* Weave in radiant Royal Blue with star flare */}
-            <span className="inline-block relative text-royal ml-0.5 drop-shadow-[0_4px_16px_rgba(49,95,233,0.30)]">
+            {/* Weave in radiant Royal Blue with star spark */}
+            <span className="inline-block relative text-royal ml-0.5 drop-shadow-[0_4px_16px_rgba(49,95,233,0.35)]">
               Weave
-              {/* Luminous Star Flare over letter 'i' */}
+              {/* Luminous Star Spark over letter 'i' */}
               <span 
                 className="absolute -top-3.5 left-[18%] w-4 h-4 text-tangerine pointer-events-none animate-pulse-glow"
                 style={{ filter: 'drop-shadow(0 0 6px #E97942)' }}
@@ -300,30 +306,152 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
             </span>
           </h1>
 
-          {/* Luminous Laser Energy Weave Line */}
+          {/* Luminous Laser Energy Weave Beam */}
           <div className="relative w-64 h-1 my-5 overflow-visible flex items-center justify-center">
-            {/* Energy Core Beam */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-royal to-transparent rounded-full opacity-90 blur-[0.5px]" />
             <div className="absolute inset-x-8 top-0 h-0.5 bg-gradient-to-r from-royal via-tangerine to-royal rounded-full shadow-[0_0_8px_#315FE9]" />
-            {/* Pulsing focal nodes */}
             <span className="w-2 h-2 rounded-full bg-royal absolute -left-1 shadow-[0_0_8px_#315FE9] animate-ping" />
             <span className="w-2 h-2 rounded-full bg-tangerine absolute -right-1 shadow-[0_0_8px_#E97942] animate-ping" />
           </div>
 
-          {/* Tagline with cinematic character tracking */}
           <p className="text-base sm:text-lg font-mono text-ink/80 tracking-wide font-medium mt-1">
             Weaving Knowledge Into Discovery.
           </p>
 
-          {/* Ambient Frequency Telegraph */}
           <div className="mt-8 flex items-center space-x-2 text-[11px] font-mono text-ink-muted">
             <span className="w-2 h-2 rounded-full bg-royal animate-pulse" />
-            <span>Establishing Semantic Graph Topology...</span>
+            <span>Harmonizing Semantic Topology...</span>
           </div>
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
-            STAGE 2: CINEMATIC LOGO ANIMATION WITH 3D ORBITAL VFX
+            STAGE 2: THE "WEAVE" TAPESTRY ANIMATION (1.5s - 2.8s)
+           ══════════════════════════════════════════════════════════════════ */}
+        <div
+          className={`
+            w-full flex flex-col items-center justify-center transition-all duration-600 ease-out
+            ${phase === 'weave' ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none absolute'}
+          `}
+        >
+          {/* Weave Headline */}
+          <div className="text-[11px] font-mono tracking-widest text-royal uppercase font-semibold mb-2 flex items-center space-x-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-royal animate-ping" />
+            <span>Weaving Discrete Domains Into Synthesis</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-tangerine animate-ping" />
+          </div>
+
+          {/* SVG Dynamic Weaving Loom Canvas */}
+          <div className="relative w-full max-w-xl h-64 flex items-center justify-center">
+            <svg 
+              viewBox="0 0 600 240" 
+              className="w-full h-full overflow-visible"
+              style={{ filter: 'drop-shadow(0 0 12px rgba(49, 95, 233, 0.25))' }}
+            >
+              <defs>
+                <linearGradient id="blueRibbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#315FE9" stopOpacity="0.1" />
+                  <stop offset="30%" stopColor="#315FE9" stopOpacity="0.9" />
+                  <stop offset="70%" stopColor="#2563EB" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#315FE9" stopOpacity="0.3" />
+                </linearGradient>
+
+                <linearGradient id="tangerineRibbonGrad" x1="100%" y1="0%" x2="0%" y2="0%">
+                  <stop offset="0%" stopColor="#E97942" stopOpacity="0.1" />
+                  <stop offset="30%" stopColor="#E97942" stopOpacity="0.9" />
+                  <stop offset="70%" stopColor="#EA580C" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#E97942" stopOpacity="0.3" />
+                </linearGradient>
+
+                <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              {/* Background Harmonic Weave Waves */}
+              <path
+                d="M 40 120 C 120 40, 200 200, 300 120 C 400 40, 480 200, 560 120"
+                fill="none"
+                stroke="url(#blueRibbonGrad)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                style={{
+                  strokeDasharray: 800,
+                  animation: 'weaveDraw 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}
+              />
+
+              <path
+                d="M 40 120 C 120 200, 200 40, 300 120 C 400 200, 480 40, 560 120"
+                fill="none"
+                stroke="url(#tangerineRibbonGrad)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                style={{
+                  strokeDasharray: 800,
+                  animation: 'weaveDraw 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}
+              />
+
+              {/* Core Interlocking "M" Shape Trajectory Paths */}
+              {/* Left Peak of M (Royal Blue) */}
+              <path
+                d="M 180 180 C 180 80, 240 60, 300 140"
+                fill="none"
+                stroke="#315FE9"
+                strokeWidth="6"
+                strokeLinecap="round"
+                filter="url(#glowFilter)"
+                style={{
+                  strokeDasharray: 400,
+                  animation: 'weaveDraw 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}
+              />
+
+              {/* Right Peak of M (Burnt Tangerine) */}
+              <path
+                d="M 420 180 C 420 80, 360 60, 300 140"
+                fill="none"
+                stroke="#E97942"
+                strokeWidth="6"
+                strokeLinecap="round"
+                filter="url(#glowFilter)"
+                style={{
+                  strokeDasharray: 400,
+                  animation: 'weaveDraw 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                }}
+              />
+
+              {/* Traveling Luminous Photons on the Weave */}
+              <circle r="4" fill="#FFFFFF" filter="drop-shadow(0 0 6px #315FE9)">
+                <animateMotion
+                  path="M 40 120 C 120 40, 200 200, 300 120 C 400 40, 480 200, 560 120"
+                  dur="1.2s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+
+              <circle r="4" fill="#FFFFFF" filter="drop-shadow(0 0 6px #E97942)">
+                <animateMotion
+                  path="M 560 120 C 480 40, 400 200, 300 120 C 200 40, 120 200, 40 120"
+                  dur="1.2s"
+                  repeatCount="indefinite"
+                />
+              </circle>
+
+              {/* Central Convergence Spark Nexus */}
+              <circle cx="300" cy="140" r="7" fill="#FFFFFF" filter="drop-shadow(0 0 10px #FFFFFF)" className="animate-ping" />
+              <circle cx="300" cy="140" r="4" fill="#315FE9" />
+            </svg>
+          </div>
+
+          <p className="text-xs font-mono text-ink/70 mt-2">
+            Interlocking Hypotheses & Autonomous Analogies...
+          </p>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            STAGE 3: THE OFFICIAL 3D LOGO & ORBITAL EMBLEM (2.8s - 4.2s)
            ══════════════════════════════════════════════════════════════════ */}
         <div
           className={`
@@ -385,7 +513,7 @@ export const TheWeaveIntro: React.FC<TheWeaveIntroProps> = ({ onComplete, forceP
           </div>
 
           <p className="mt-1.5 text-xs font-mono text-ink/70">
-            Synthesizing Autonomous Knowledge Space...
+            Synthesizing Knowledge Cosmos...
           </p>
         </div>
 
