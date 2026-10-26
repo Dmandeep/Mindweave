@@ -145,7 +145,7 @@ const CanvasInner: React.FC = () => {
           type: MarkerType.ArrowClosed,
           width: 12,
           height: 12,
-          color: isHighlighted ? '#315FE9' : 'rgba(37, 37, 37, 0.35)',
+          color: isHighlighted ? '#315FE9' : 'rgba(37, 37, 37, 0.40)',
         },
         animated: isPartofActiveDiscovery || rel.status === 'proposed',
       };
@@ -188,7 +188,7 @@ const CanvasInner: React.FC = () => {
   }, [selectConcept, selectRelationship]);
 
   return (
-    <div className="relative w-full h-full bg-cream overflow-hidden select-none animate-fade-in">
+    <div className="relative w-full h-full bg-[#FAF7F0] overflow-hidden select-none animate-fade-in">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -208,26 +208,26 @@ const CanvasInner: React.FC = () => {
         <Background
           variant={BackgroundVariant.Dots}
           gap={24}
-          size={1.2}
-          color="rgba(37, 37, 37, 0.12)"
+          size={1.1}
+          color="rgba(37, 37, 37, 0.08)"
         />
         <Controls
           showInteractive={false}
-          className="!bottom-5 !left-5 !bg-white !border-ink/12 !rounded-md !overflow-hidden !shadow-sm"
+          className="!bottom-5 !left-5 !bg-[#FCFAF5] !border-ink/12 !rounded-lg !overflow-hidden !shadow-card"
         />
         <MiniMap
           nodeStrokeColor="#315FE9"
-          nodeColor="#FFFFFF"
+          nodeColor="#FCFAF5"
           nodeBorderRadius={3}
-          maskColor="rgba(250, 247, 240, 0.75)"
-          className="!bottom-5 !right-5 !bg-white/90 !border-ink/12 !rounded-md !shadow-sm !w-40 !h-28 hidden md:block"
+          maskColor="rgba(250, 247, 240, 0.70)"
+          className="!bottom-5 !right-5 !bg-[#FCFAF5]/95 !border-ink/12 !rounded-lg !shadow-card !w-40 !h-28 hidden md:block"
         />
       </ReactFlow>
 
       {/* Floating Canvas HUD */}
       <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
         <div className="flex items-center gap-2 pointer-events-auto">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/95 backdrop-blur-md border border-ink/12 shadow-xs text-xs text-ink-secondary">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FCFAF5]/95 backdrop-blur-md border border-ink/12 shadow-card text-xs text-ink-secondary">
             <Compass className="w-3.5 h-3.5 text-royal" />
             <span className="font-semibold text-ink-primary">Knowledge Graph</span>
             <span className="text-ink-faint">•</span>
@@ -237,7 +237,7 @@ const CanvasInner: React.FC = () => {
           </div>
 
           {selectedDomainFilter && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-royal-subtle border border-royal/30 text-xs text-royal backdrop-blur-md font-medium">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-royal-subtle border border-royal/30 text-xs text-royal backdrop-blur-md font-medium shadow-xs">
               <Filter className="w-3 h-3" />
               <span>{selectedDomainFilter}</span>
               <button
@@ -252,7 +252,7 @@ const CanvasInner: React.FC = () => {
         </div>
 
         {/* Minimal Legend using Approved 4 Colors */}
-        <div className="hidden lg:flex items-center gap-4 px-3.5 py-1.5 rounded-md bg-white/95 backdrop-blur-md border border-ink/12 shadow-xs text-[11px] text-ink-secondary pointer-events-auto">
+        <div className="hidden lg:flex items-center gap-4 px-3.5 py-1.5 rounded-lg bg-[#FCFAF5]/95 backdrop-blur-md border border-ink/12 shadow-card text-[11px] text-ink-secondary pointer-events-auto">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-royal" />
             <span>Active Edge</span>
@@ -270,8 +270,8 @@ const CanvasInner: React.FC = () => {
 
       {/* Empty State Overlay */}
       {concepts.length === 0 && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-auto p-6 text-center z-10 bg-cream/90 backdrop-blur-xs animate-fade-in-up">
-          <div className="w-12 h-12 rounded-xl bg-white border border-ink/12 flex items-center justify-center text-ink-muted mb-3 shadow-xs">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-auto p-6 text-center z-10 bg-[#FAF7F0]/90 backdrop-blur-xs animate-fade-in-up">
+          <div className="w-12 h-12 rounded-xl bg-[#FCFAF5] border border-ink/12 flex items-center justify-center text-ink-muted mb-3 shadow-card">
             <Layers className="w-6 h-6 text-royal" />
           </div>
           <h3 className="text-sm font-semibold text-ink-primary mb-1">Knowledge Universe is Empty</h3>
@@ -280,7 +280,7 @@ const CanvasInner: React.FC = () => {
           </p>
           <button
             onClick={() => useKnowledgeStore.getState().setCaptureModalOpen(true)}
-            className="bg-royal hover:bg-royal-hover text-white text-xs px-3.5 py-1.5 rounded-md font-medium shadow-xs transition-all active:scale-98"
+            className="bg-royal hover:bg-royal-hover text-white text-xs px-3.5 py-1.5 rounded-lg font-medium shadow-card transition-all active:scale-98"
           >
             Capture First Idea
           </button>

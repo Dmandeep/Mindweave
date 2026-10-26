@@ -109,7 +109,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
   if (!activeInvestigation) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-cream text-center h-full select-none animate-fade-in-up">
-        <div className="w-12 h-12 rounded-xl bg-white border border-ink/10 flex items-center justify-center text-royal mb-4 shadow-xs">
+        <div className="w-12 h-12 rounded-xl bg-[#FCFAF5] border border-ink/10 flex items-center justify-center text-royal mb-4 shadow-card">
           <FlaskConical className="w-6 h-6" />
         </div>
         <h2 className="text-sm font-semibold text-ink-primary mb-1">Discovery Lab is Idle</h2>
@@ -211,7 +211,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col h-full bg-cream overflow-hidden select-none animate-fade-in">
       {/* Workbench Header */}
-      <div className="px-6 py-3.5 border-b border-ink/10 bg-white/95 backdrop-blur-sm shadow-2xs">
+      <div className="px-6 py-3.5 border-b border-ink/10 bg-[#FCFAF5]/95 backdrop-blur-sm shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
@@ -293,7 +293,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
       {/* Main Investigation Columns */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4 max-w-5xl mx-auto w-full">
         {/* Stage 1: Scientific Question & Hypothesis */}
-        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up">
+        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-royal" />
@@ -373,7 +373,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 2: Empirical Benchmark Protocol */}
-        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-4 h-4 text-royal" />
@@ -383,7 +383,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
             </div>
             <button
               onClick={handleSaveProtocol}
-              className="text-[10px] px-2 py-0.5 rounded bg-royal text-white font-medium hover:bg-royal-hover shadow-2xs"
+              className="text-[10px] px-2.5 py-1 rounded-lg bg-royal text-white font-medium hover:bg-royal-hover shadow-xs active:scale-98 transition-all"
             >
               Update Protocol
             </button>
@@ -397,7 +397,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
               rows={2}
               value={methodologyText}
               onChange={(e) => setMethodologyText(e.target.value)}
-              className="w-full bg-cream-100 border border-ink/10 rounded-md px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal leading-relaxed"
+              className="w-full bg-[#FAF7F0] border border-ink/10 rounded-lg px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal leading-relaxed"
             />
           </div>
 
@@ -408,7 +408,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {activeInvestigation.experimentPlan.successCriteria?.map((criterion, idx) => (
-                <div key={idx} className="p-2.5 rounded bg-cream-100 border border-ink/8 flex items-center justify-between text-xs">
+                <div key={idx} className="p-2.5 rounded-lg bg-[#FAF7F0] border border-ink/8 flex items-center justify-between text-xs">
                   <span className="text-ink-secondary truncate pr-2">{criterion.metricName || (criterion as any).metric}</span>
                   <span className="font-mono text-[10px] text-royal font-semibold shrink-0">
                     {criterion.operator} {criterion.targetThreshold}
@@ -420,7 +420,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 3: Telemetry & Observations */}
-        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           <div className="flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-tangerine" />
             <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
@@ -429,11 +429,11 @@ export const DiscoveryLabWorkbench: React.FC = () => {
           </div>
 
           {activeInvestigation.experimentPlan.observations ? (
-            <div className="p-3 rounded-md bg-cream-100 border border-ink/8 text-xs text-ink-secondary font-mono whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
+            <div className="p-3 rounded-lg bg-[#FAF7F0] border border-ink/8 text-xs text-ink-secondary font-mono whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
               {activeInvestigation.experimentPlan.observations}
             </div>
           ) : (
-            <div className="p-3 rounded-md bg-cream-100 border border-dashed border-ink/15 text-center text-xs text-ink-muted">
+            <div className="p-3 rounded-lg bg-[#FAF7F0] border border-dashed border-ink/15 text-center text-xs text-ink-muted">
               No observations recorded yet. Append empirical telemetry below.
             </div>
           )}
@@ -444,13 +444,13 @@ export const DiscoveryLabWorkbench: React.FC = () => {
               onChange={(e) => setNewObservation(e.target.value)}
               rows={2}
               placeholder="Log quantitative observations or benchmark readings..."
-              className="w-full rounded-md bg-cream-100 border border-ink/10 px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
+              className="w-full rounded-lg bg-[#FAF7F0] border border-ink/10 px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
             />
             <div className="flex justify-end">
               <button
                 onClick={handleAddObservation}
                 disabled={!newObservation.trim()}
-                className="px-3 py-1 rounded-md bg-tangerine hover:bg-tangerine-hover text-white text-xs font-medium shadow-2xs transition-colors disabled:opacity-40"
+                className="px-3 py-1.5 rounded-lg bg-tangerine hover:bg-tangerine-hover text-white text-xs font-medium shadow-card transition-all active:scale-98 disabled:opacity-40"
               >
                 Append Telemetry
               </button>
@@ -459,7 +459,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 4: Verbatim Evidence Records */}
-        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           <div className="flex items-center gap-2">
             <Quote className="w-4 h-4 text-royal" />
             <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
@@ -469,7 +469,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
 
           <div className="space-y-2">
             {evidenceList.map((ev) => (
-              <div key={ev.id} className="p-2.5 rounded-md bg-cream-100 border border-ink/8 text-xs space-y-1">
+              <div key={ev.id} className="p-2.5 rounded-lg bg-[#FAF7F0] border border-ink/8 text-xs space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-ink-muted font-mono">
                   <span className="font-semibold text-ink-secondary truncate max-w-[200px]">{ev.sourceTitle}</span>
                   <span
@@ -491,26 +491,26 @@ export const DiscoveryLabWorkbench: React.FC = () => {
             ))}
           </div>
 
-          <div className="space-y-2 p-3 rounded-md bg-cream-100 border border-ink/8">
+          <div className="space-y-2 p-3 rounded-lg bg-[#FAF7F0] border border-ink/8">
             <input
               type="text"
               placeholder="Source Title / Paper Reference..."
               value={newEvidenceSource}
               onChange={(e) => setNewEvidenceSource(e.target.value)}
-              className="w-full bg-white border border-ink/10 rounded px-2.5 py-1 text-xs text-ink-primary focus:outline-none focus:border-royal"
+              className="w-full bg-[#FCFAF5] border border-ink/10 rounded-lg px-2.5 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal"
             />
             <textarea
               placeholder="Verbatim quote or measured excerpt..."
               value={newEvidenceQuote}
               onChange={(e) => setNewEvidenceQuote(e.target.value)}
               rows={2}
-              className="w-full bg-white border border-ink/10 rounded px-2.5 py-1 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
+              className="w-full bg-[#FCFAF5] border border-ink/10 rounded-lg px-2.5 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
             />
             <div className="flex items-center justify-between">
               <select
                 value={newEvidenceStance}
                 onChange={(e) => setNewEvidenceStance(e.target.value as any)}
-                className="bg-white border border-ink/10 rounded px-2 py-1 text-xs text-ink-primary focus:outline-none"
+                className="bg-[#FCFAF5] border border-ink/10 rounded-lg px-2.5 py-1.5 text-xs text-ink-primary focus:outline-none"
               >
                 <option value="supports">Stance: Supports</option>
                 <option value="refutes">Stance: Refutes</option>
@@ -519,7 +519,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
               <button
                 onClick={handleAddEvidence}
                 disabled={!newEvidenceQuote.trim()}
-                className="px-3 py-1 rounded bg-royal hover:bg-royal-hover text-white text-xs font-medium disabled:opacity-40 transition-colors shadow-2xs"
+                className="px-3 py-1.5 rounded-lg bg-royal hover:bg-royal-hover text-white text-xs font-medium disabled:opacity-40 transition-all shadow-card active:scale-98"
               >
                 Attach Evidence Record
               </button>
@@ -528,7 +528,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 5: Epistemic Outcome Reconciliation & Graph Connection */}
-        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-royal" />

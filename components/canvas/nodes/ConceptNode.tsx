@@ -18,37 +18,37 @@ export const ConceptNode = memo(({ data, selected }: { data: ConceptNodeData; se
     <div
       className={`
         relative group rounded-lg p-3.5 w-60 text-left transition-all duration-200
-        bg-white border
+        border backdrop-blur-xs
         ${
           isSelected
-            ? 'border-royal ring-2 ring-royal/30 shadow-md shadow-royal/10 scale-[1.01]'
-            : 'border-ink/12 hover:border-ink/25 hover:shadow-sm'
+            ? 'bg-[#F6F9FF] border-royal ring-2 ring-royal/25 shadow-selected scale-[1.015]'
+            : 'bg-[#FCFAF5] border-ink/12 hover:border-ink/25 hover:shadow-card-hover hover:-translate-y-0.5'
         }
       `}
     >
-      {/* 4 Handles for clean orthogonal and curved connections */}
+      {/* 4 Connection Handles with Subtle Hover Elevation */}
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
+        className="!w-2 !h-2 !bg-ink/35 !border-[#FCFAF5] hover:!bg-royal hover:scale-125 transition-all"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
+        className="!w-2 !h-2 !bg-ink/35 !border-[#FCFAF5] hover:!bg-royal hover:scale-125 transition-all"
       />
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
+        className="!w-2 !h-2 !bg-ink/35 !border-[#FCFAF5] hover:!bg-royal hover:scale-125 transition-all"
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
+        className="!w-2 !h-2 !bg-ink/35 !border-[#FCFAF5] hover:!bg-royal hover:scale-125 transition-all"
       />
 
-      {/* Domain Chip & Connection Count */}
+      {/* Domain Badge & Connection Metric */}
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center space-x-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-royal shrink-0" />
@@ -56,13 +56,13 @@ export const ConceptNode = memo(({ data, selected }: { data: ConceptNodeData; se
             {concept.domainCategory}
           </span>
         </div>
-        <span className="text-[9px] font-mono text-ink-muted px-1.5 py-0.5 rounded bg-cream-200 border border-ink/10">
+        <span className="text-[9px] font-mono text-ink-secondary px-1.5 py-0.5 rounded bg-[#FAF7F0] border border-ink/10 shadow-2xs">
           {connectionCount} {connectionCount === 1 ? 'edge' : 'edges'}
         </span>
       </div>
 
-      {/* Concept Canonical Title */}
-      <h4 className="text-xs font-semibold text-ink-primary tracking-tight leading-snug truncate">
+      {/* Canonical Concept Title */}
+      <h4 className="text-xs font-semibold text-ink-primary tracking-tight leading-snug truncate group-hover:text-royal transition-colors">
         {concept.canonicalName}
       </h4>
 

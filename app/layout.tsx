@@ -14,11 +14,16 @@ export const metadata: Metadata = {
     'MindWeave',
   ],
   authors: [{ name: 'MindWeave Systems' }],
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     title: 'MindWeave — Weaving Knowledge Into Discovery',
     description:
       'An AI-powered knowledge discovery platform combining an interactive persistent graph, autonomous bridge generation, and hypothesis investigation lab.',
     type: 'website',
+    images: ['/logo.png'],
   },
 };
 
@@ -29,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-cream text-ink antialiased overflow-hidden selection:bg-royal/15 selection:text-royal">
+      <body className="bg-[#FAF7F0] text-ink antialiased overflow-hidden selection:bg-royal/15 selection:text-royal">
         {children}
       </body>
     </html>

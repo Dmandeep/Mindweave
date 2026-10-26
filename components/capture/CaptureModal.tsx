@@ -27,7 +27,7 @@ export const CaptureModal: React.FC = () => {
       onClick={() => setCaptureModalOpen(false)}
     >
       <div 
-        className="w-full max-w-lg bg-white border border-ink/12 rounded-xl shadow-xl overflow-hidden flex flex-col animate-scale-in"
+        className="w-full max-w-lg bg-[#FCFAF5] border border-ink/12 rounded-xl shadow-card overflow-hidden flex flex-col animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}

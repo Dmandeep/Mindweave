@@ -43,14 +43,15 @@ export const TypedEdge = memo(({
     ? '#315FE9' 
     : isProposed 
     ? '#E97942' 
-    : 'rgba(37, 37, 37, 0.35)';
+    : 'rgba(37, 37, 37, 0.40)';
 
   const strokeStyle = {
     ...style,
     stroke: strokeColor,
     strokeWidth,
-    strokeDasharray: isProposed ? '4,4' : undefined,
-    opacity: isSelected ? 1 : 0.8,
+    strokeDasharray: isProposed ? '5,5' : undefined,
+    opacity: isSelected ? 1 : 0.85,
+    transition: 'stroke 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
   };
 
   return (
@@ -65,25 +66,25 @@ export const TypedEdge = memo(({
           }}
           className={`
             px-2 py-0.5 rounded text-[10px] font-mono tracking-tight select-none cursor-pointer transition-all duration-150
-            bg-white border shadow-xs
+            border backdrop-blur-xs
             ${
               isSelected
-                ? 'border-royal text-royal shadow-sm ring-1 ring-royal/30'
-                : 'border-ink/12 text-ink-muted hover:text-ink hover:border-ink/25'
+                ? 'bg-[#F6F9FF] border-royal text-royal shadow-sm ring-1 ring-royal/30'
+                : 'bg-[#FCFAF5] border-ink/12 text-ink-muted hover:text-ink hover:border-ink/30 hover:shadow-xs'
             }
           `}
         >
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1.5">
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
+              className={`w-1.5 h-1.5 rounded-full shrink-0 transition-transform ${
                 isSelected
-                  ? 'bg-royal'
+                  ? 'bg-royal scale-125'
                   : isProposed
                   ? 'bg-tangerine'
                   : 'bg-ink/40'
               }`}
             />
-            <span>{relType.replace(/_/g, ' ')}</span>
+            <span className="capitalize">{relType.replace(/_/g, ' ')}</span>
           </div>
         </div>
       </EdgeLabelRenderer>

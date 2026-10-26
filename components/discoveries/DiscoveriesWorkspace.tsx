@@ -97,7 +97,7 @@ export const DiscoveriesWorkspace: React.FC = () => {
   return (
     <div className="flex-1 flex flex-col h-full bg-cream overflow-hidden select-none animate-fade-in">
       {/* Header Bar */}
-      <div className="px-6 py-4 border-b border-ink/10 bg-white/95 backdrop-blur-sm shadow-2xs">
+      <div className="px-6 py-4 border-b border-ink/10 bg-[#FCFAF5]/95 backdrop-blur-sm shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
             <div className="flex items-center space-x-2">
@@ -219,8 +219,8 @@ export const DiscoveriesWorkspace: React.FC = () => {
       {/* Discovery Grid Feed */}
       <div className="flex-1 overflow-y-auto p-6">
         {filteredCandidates.length === 0 ? (
-          <div className="text-center py-16 px-4 bg-white rounded-xl border border-dashed border-ink/15 max-w-md mx-auto animate-fade-in-up">
-            <div className="w-10 h-10 rounded-full bg-cream-200 flex items-center justify-center mx-auto mb-3 text-tangerine">
+          <div className="text-center py-16 px-4 bg-[#FCFAF5] rounded-xl border border-dashed border-ink/15 max-w-md mx-auto shadow-card animate-fade-in-up">
+            <div className="w-10 h-10 rounded-full bg-[#FAF7F0] flex items-center justify-center mx-auto mb-3 text-tangerine border border-ink/10">
               <Sparkles className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-semibold text-ink-primary">No discoveries match criteria</h3>
@@ -229,7 +229,7 @@ export const DiscoveriesWorkspace: React.FC = () => {
             </p>
             <button
               onClick={handleScan}
-              className="mt-4 px-3 py-1.5 rounded-md bg-royal hover:bg-royal-hover text-white text-xs font-medium inline-flex items-center gap-1.5 shadow-xs transition-all"
+              className="mt-4 px-3 py-1.5 rounded-lg bg-royal hover:bg-royal-hover text-white text-xs font-medium inline-flex items-center gap-1.5 shadow-card transition-all active:scale-98"
             >
               <RefreshCw className="w-3 h-3" />
               <span>Scan Knowledge Space</span>
@@ -247,11 +247,11 @@ export const DiscoveriesWorkspace: React.FC = () => {
                   onClick={() => selectDiscovery(cand.id)}
                   style={{ animationDelay: `${index * 50}ms` }}
                   className={`
-                    rounded-xl p-4.5 transition-all duration-200 border cursor-pointer relative group flex flex-col justify-between bg-white animate-fade-in-up
+                    rounded-xl p-4.5 transition-all duration-200 border cursor-pointer relative group flex flex-col justify-between bg-[#FCFAF5] animate-fade-in-up
                     ${
                       isSelected
-                        ? 'border-royal ring-2 ring-royal/30 shadow-md scale-[1.005]'
-                        : 'border-ink/10 hover:border-ink/20 hover:shadow-xs'
+                        ? 'border-royal ring-2 ring-royal/25 shadow-selected scale-[1.008]'
+                        : 'border-ink/12 hover:border-ink/25 hover:shadow-card-hover hover:-translate-y-0.5'
                     }
                   `}
                 >
@@ -318,7 +318,7 @@ export const DiscoveriesWorkspace: React.FC = () => {
                         </h4>
                       </div>
 
-                      <div className="px-2 py-0.5 rounded bg-white border border-ink/10 text-[10px] font-mono text-royal font-semibold shrink-0 shadow-2xs">
+                      <div className="px-2 py-0.5 rounded-md bg-[#FAF7F0] border border-ink/10 text-[10px] font-mono text-royal font-semibold shrink-0 shadow-xs">
                         {cand.proposedRelationship.replace(/_/g, ' ')}
                       </div>
 
@@ -440,7 +440,7 @@ export const DiscoveriesWorkspace: React.FC = () => {
                         placeholder="Reason (e.g. Incompatible biological diffusion bounds)..."
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
-                        className="w-full bg-white border border-ink/15 rounded px-2.5 py-1 text-xs text-ink-primary focus:outline-none focus:border-royal"
+                        className="w-full bg-[#FCFAF5] border border-ink/15 rounded-lg px-2.5 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                       />
                       <div className="flex justify-end gap-2">
                         <button

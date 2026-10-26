@@ -60,7 +60,7 @@ module.exports = {
 
         surface: {
           base: "#FAF7F0",
-          card: "#FFFFFF",
+          card: "#FCFAF5", // Refined warm cream surface, distinct from background without harsh chalk-white
           elevated: "#F3EDE0",
           active: "rgba(49, 95, 233, 0.08)",
           highlight: "rgba(233, 121, 66, 0.08)",
@@ -72,14 +72,14 @@ module.exports = {
           faint: "rgba(37, 37, 37, 0.30)",
         },
         brand: {
-          DEFAULT: "#315FE9", // Royal Blue
+          DEFAULT: "#315FE9",
           hover: "#264EC8",
           subtle: "rgba(49, 95, 233, 0.08)",
           glow: "rgba(49, 95, 233, 0.18)",
           light: "#315FE9",
         },
         discovery: {
-          DEFAULT: "#E97942", // Burnt Tangerine
+          DEFAULT: "#E97942",
           light: "#E97942",
           dark: "#D66731",
           subtle: "rgba(233, 121, 66, 0.10)",
@@ -105,11 +105,28 @@ module.exports = {
           subtle: "rgba(37, 37, 37, 0.08)",
         },
       },
+      boxShadow: {
+        xs: "0 1px 2px rgba(37, 37, 37, 0.04)",
+        sm: "0 1px 3px rgba(37, 37, 37, 0.06), 0 1px 2px rgba(37, 37, 37, 0.04)",
+        card: "0 2px 6px rgba(37, 37, 37, 0.05), 0 1px 2px rgba(37, 37, 37, 0.03)",
+        "card-hover": "0 6px 16px rgba(37, 37, 37, 0.08), 0 2px 4px rgba(37, 37, 37, 0.04)",
+        selected: "0 0 0 1px #315FE9, 0 4px 16px rgba(49, 95, 233, 0.14)",
+        discovery: "0 0 0 1px #E97942, 0 4px 16px rgba(233, 121, 66, 0.14)",
+      },
       borderRadius: {
         xl: "12px",
         lg: "8px",
         md: "6px",
         sm: "4px",
+      },
+      transitionDuration: {
+        micro: "150ms",
+        control: "180ms",
+        card: "240ms",
+        reveal: "380ms",
+      },
+      transitionTimingFunction: {
+        gestalt: "cubic-bezier(0.16, 1, 0.3, 1)",
       },
       fontFamily: {
         sans: [

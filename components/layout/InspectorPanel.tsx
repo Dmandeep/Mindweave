@@ -130,7 +130,7 @@ export const InspectorPanel: React.FC = () => {
 
   if (!isOpen) {
     return (
-      <aside className="w-80 border-l border-ink/10 bg-white p-4 flex flex-col justify-between select-none hidden lg:flex shrink-0">
+      <aside className="w-80 border-l border-ink/10 bg-[#FCFAF5] p-4 flex flex-col justify-between select-none hidden lg:flex shrink-0">
         <div>
           <div className="flex items-center space-x-2 text-ink-muted mb-4">
             <BookOpen className="w-4 h-4 text-royal" />
@@ -170,7 +170,7 @@ export const InspectorPanel: React.FC = () => {
   }
 
   return (
-    <aside className="w-80 border-l border-ink/10 bg-white flex flex-col h-[calc(100vh-3rem)] select-none z-20 shadow-md overflow-y-auto shrink-0 animate-slide-in-right">
+    <aside className="w-80 border-l border-ink/10 bg-[#FCFAF5] flex flex-col h-[calc(100vh-3rem)] select-none z-20 shadow-card overflow-y-auto shrink-0 animate-slide-in-right">
       {/* Inspector Top Bar */}
       <div className="p-3 border-b border-ink/10 flex items-center justify-between bg-cream-100/80 sticky top-0 backdrop-blur-sm z-10">
         <div className="flex items-center space-x-2">
@@ -197,7 +197,7 @@ export const InspectorPanel: React.FC = () => {
         {selectedConcept && (
           <div className="space-y-4 animate-fade-in">
             {isEditingConcept ? (
-              <div className="space-y-3 p-3 bg-cream-100 rounded-md border border-ink/10">
+              <div className="space-y-3 p-3 bg-[#FAF7F0] rounded-lg border border-ink/10 shadow-xs">
                 <div className="text-xs font-semibold text-ink-primary mb-1">Edit Concept</div>
                 <div>
                   <label className="text-[10px] font-mono text-ink-muted uppercase block mb-1">Canonical Name</label>
@@ -205,7 +205,7 @@ export const InspectorPanel: React.FC = () => {
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full bg-white border border-ink/15 text-xs rounded px-2 py-1 text-ink-primary focus:outline-none focus:border-royal"
+                    className="w-full bg-[#FCFAF5] border border-ink/15 text-xs rounded-lg px-2.5 py-1.5 text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                   />
                 </div>
                 <div>
@@ -214,7 +214,7 @@ export const InspectorPanel: React.FC = () => {
                     type="text"
                     value={editDomain}
                     onChange={(e) => setEditDomain(e.target.value)}
-                    className="w-full bg-white border border-ink/15 text-xs rounded px-2 py-1 text-ink-primary focus:outline-none focus:border-royal"
+                    className="w-full bg-[#FCFAF5] border border-ink/15 text-xs rounded-lg px-2.5 py-1.5 text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                   />
                 </div>
                 <div>
@@ -223,20 +223,20 @@ export const InspectorPanel: React.FC = () => {
                     rows={3}
                     value={editDesc}
                     onChange={(e) => setEditDesc(e.target.value)}
-                    className="w-full bg-white border border-ink/15 text-xs rounded px-2 py-1 text-ink-primary focus:outline-none focus:border-royal"
+                    className="w-full bg-[#FCFAF5] border border-ink/15 text-xs rounded-lg px-2.5 py-1.5 text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                   />
                 </div>
                 <div className="flex items-center space-x-2 pt-1">
                   <button
                     onClick={handleSaveConceptEdit}
-                    className="flex-1 bg-royal hover:bg-royal-hover text-white text-xs py-1 px-2 rounded font-medium flex items-center justify-center space-x-1 shadow-xs"
+                    className="flex-1 bg-royal hover:bg-royal-hover text-white text-xs py-1.5 px-2.5 rounded-lg font-medium flex items-center justify-center space-x-1 shadow-card transition-all active:scale-98"
                   >
                     <Check className="w-3.5 h-3.5" />
                     <span>Save</span>
                   </button>
                   <button
                     onClick={() => setIsEditingConcept(false)}
-                    className="bg-white hover:bg-cream-200 text-ink-secondary text-xs py-1 px-2 rounded border border-ink/15"
+                    className="bg-[#FCFAF5] hover:bg-cream-200 text-ink-secondary text-xs py-1.5 px-2.5 rounded-lg border border-ink/15 transition-colors"
                   >
                     Cancel
                   </button>
@@ -307,7 +307,7 @@ export const InspectorPanel: React.FC = () => {
                     <select
                       value={targetConceptId}
                       onChange={(e) => setTargetConceptId(e.target.value)}
-                      className="w-full bg-white border border-ink/15 text-xs rounded px-2 py-1 text-ink-primary focus:outline-none"
+                      className="w-full bg-[#FCFAF5] border border-ink/15 text-xs rounded-lg px-2.5 py-1.5 text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                       required
                     >
                       <option value="">Select target node...</option>
@@ -325,7 +325,7 @@ export const InspectorPanel: React.FC = () => {
                     <select
                       value={connectRelType}
                       onChange={(e) => setConnectRelType(e.target.value as RelationshipType)}
-                      className="w-full bg-white border border-ink/15 text-xs rounded px-2 py-1 text-ink-primary focus:outline-none"
+                      className="w-full bg-[#FCFAF5] border border-ink/15 text-xs rounded-lg px-2.5 py-1.5 text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                     >
                       <option value="enables">enables</option>
                       <option value="inhibits">inhibits</option>
@@ -344,12 +344,12 @@ export const InspectorPanel: React.FC = () => {
                       placeholder="Why does this connection hold?"
                       value={connectRationale}
                       onChange={(e) => setConnectRationale(e.target.value)}
-                      className="w-full bg-white border border-ink/15 text-xs rounded px-2 py-1 text-ink-primary focus:outline-none"
+                      className="w-full bg-[#FCFAF5] border border-ink/15 text-xs rounded-lg px-2.5 py-1.5 text-ink-primary focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-royal hover:bg-royal-hover text-white text-xs py-1 rounded font-medium transition-colors shadow-xs"
+                    className="w-full bg-royal hover:bg-royal-hover text-white text-xs py-1.5 rounded-lg font-medium transition-all shadow-card active:scale-98"
                   >
                     Establish Relationship
                   </button>
@@ -572,7 +572,7 @@ export const InspectorPanel: React.FC = () => {
                     </p>
 
                     {permittedScope && (
-                      <div className="text-[10px] bg-white p-2 rounded border border-ink/10">
+                      <div className="text-[10px] bg-[#FCFAF5] p-2 rounded-lg border border-ink/10 shadow-xs">
                         <span className="text-ink-muted font-mono uppercase text-[9px] block mb-0.5">
                           Permitted Scope:
                         </span>

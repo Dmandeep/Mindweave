@@ -5,12 +5,9 @@ import { useKnowledgeStore } from '@/stores/knowledgeStore';
 import { 
   Sparkles, 
   FlaskConical, 
-  Filter, 
   Pin, 
   X, 
   Layers, 
-  CheckCircle2, 
-  Activity
 } from 'lucide-react';
 
 export const NavSidebar: React.FC = () => {
@@ -24,7 +21,6 @@ export const NavSidebar: React.FC = () => {
     dismissDiscovery,
     selectedDomainFilter,
     setSelectedDomainFilter,
-    viewMode,
   } = useKnowledgeStore();
 
   const [activeTab, setActiveTab] = useState<'discoveries' | 'domains'>('discoveries');
@@ -38,15 +34,15 @@ export const NavSidebar: React.FC = () => {
   );
 
   return (
-    <aside className="w-60 border-r border-ink/10 bg-white flex flex-col h-[calc(100vh-3rem)] select-none shrink-0 hidden md:flex">
+    <aside className="w-60 border-r border-ink/10 bg-[#FCFAF5] flex flex-col h-[calc(100vh-3rem)] select-none shrink-0 hidden md:flex">
       {/* Sidebar Mode Tabs */}
-      <div className="p-2 border-b border-ink/10 flex items-center gap-1 bg-cream-100">
+      <div className="p-2 border-b border-ink/10 flex items-center gap-1 bg-[#FAF7F0]">
         <button
           onClick={() => setActiveTab('discoveries')}
-          className={`flex-1 py-1 px-2 rounded text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors ${
+          className={`flex-1 py-1 px-2 rounded-md text-xs font-medium flex items-center justify-center space-x-1.5 transition-all ${
             activeTab === 'discoveries'
-              ? 'bg-white text-ink-primary border border-ink/10 shadow-xs'
-              : 'text-ink-muted hover:text-ink-primary'
+              ? 'bg-[#FCFAF5] text-ink border border-ink/10 shadow-xs font-semibold'
+              : 'text-ink-muted hover:text-ink hover:bg-[#F3EDE0]/50'
           }`}
         >
           <Sparkles className="w-3 h-3 text-tangerine" />
@@ -55,10 +51,10 @@ export const NavSidebar: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('domains')}
-          className={`flex-1 py-1 px-2 rounded text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors ${
+          className={`flex-1 py-1 px-2 rounded-md text-xs font-medium flex items-center justify-center space-x-1.5 transition-all ${
             activeTab === 'domains'
-              ? 'bg-white text-ink-primary border border-ink/10 shadow-xs'
-              : 'text-ink-muted hover:text-ink-primary'
+              ? 'bg-[#FCFAF5] text-ink border border-ink/10 shadow-xs font-semibold'
+              : 'text-ink-muted hover:text-ink hover:bg-[#F3EDE0]/50'
           }`}
         >
           <Layers className="w-3 h-3 text-royal" />
@@ -87,10 +83,10 @@ export const NavSidebar: React.FC = () => {
                 <div
                   key={disc.id}
                   onClick={() => selectDiscovery(disc.id)}
-                  className={`p-2.5 rounded-lg border transition-all cursor-pointer relative group ${
+                  className={`p-2.5 rounded-lg border transition-all duration-200 cursor-pointer relative group ${
                     isSelected
-                      ? 'bg-cream-100 border-royal shadow-xs ring-1 ring-royal/30'
-                      : 'bg-cream-50 border-ink/10 hover:bg-cream-100 hover:border-ink/20'
+                      ? 'bg-[#F6F9FF] border-royal shadow-sm ring-1 ring-royal/30 scale-[1.01]'
+                      : 'bg-[#FAF7F0] border-ink/10 hover:border-ink/25 hover:shadow-card hover:-translate-y-0.5'
                   }`}
                 >
                   {/* Top metadata */}
@@ -108,7 +104,7 @@ export const NavSidebar: React.FC = () => {
                   </div>
 
                   {/* Bridge Titles */}
-                  <h4 className="text-xs font-semibold text-ink-primary leading-tight mb-1 truncate">
+                  <h4 className="text-xs font-semibold text-ink leading-tight mb-1 truncate group-hover:text-royal transition-colors">
                     {disc.conceptAName} <span className="text-tangerine font-bold">↔</span> {disc.conceptBName}
                   </h4>
 
@@ -134,7 +130,7 @@ export const NavSidebar: React.FC = () => {
                         e.stopPropagation();
                         dismissDiscovery(disc.id);
                       }}
-                      className="text-ink-muted hover:text-ink-primary flex items-center space-x-0.5"
+                      className="text-ink-muted hover:text-ink flex items-center space-x-0.5"
                     >
                       <X className="w-2.5 h-2.5" />
                       <span>Dismiss</span>
@@ -152,10 +148,10 @@ export const NavSidebar: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           <button
             onClick={() => setSelectedDomainFilter(null)}
-            className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs flex items-center justify-between transition-colors ${
+            className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-all ${
               selectedDomainFilter === null
-                ? 'bg-royal text-white font-medium shadow-xs'
-                : 'text-ink-secondary hover:bg-cream-100 hover:text-ink-primary'
+                ? 'bg-royal text-white font-medium shadow-card'
+                : 'text-ink-secondary hover:bg-[#FAF7F0] hover:text-ink'
             }`}
           >
             <span>All Domains</span>
@@ -170,10 +166,10 @@ export const NavSidebar: React.FC = () => {
               <button
                 key={domain}
                 onClick={() => setSelectedDomainFilter(domain)}
-                className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs flex items-center justify-between transition-colors ${
+                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-all ${
                   isSelected
-                    ? 'bg-royal text-white font-medium shadow-xs'
-                    : 'text-ink-secondary hover:bg-cream-100 hover:text-ink-primary'
+                    ? 'bg-royal text-white font-medium shadow-card'
+                    : 'text-ink-secondary hover:bg-[#FAF7F0] hover:text-ink'
                 }`}
               >
                 <span className="truncate">{domain}</span>
@@ -185,14 +181,14 @@ export const NavSidebar: React.FC = () => {
       )}
 
       {/* Graph Density Footer */}
-      <div className="p-2.5 border-t border-ink/10 bg-cream-100 text-[10px] space-y-1">
+      <div className="p-2.5 border-t border-ink/10 bg-[#FAF7F0] text-[10px] space-y-1">
         <div className="flex items-center justify-between text-ink-muted font-mono">
           <span>Graph Density</span>
           <span className="font-semibold text-royal">
             {(relationships.length / (concepts.length || 1)).toFixed(2)} edges/node
           </span>
         </div>
-        <div className="w-full bg-cream-300 rounded-full h-1 overflow-hidden">
+        <div className="w-full bg-[#EAE0CD] rounded-full h-1 overflow-hidden">
           <div 
             className="bg-royal h-full rounded-full transition-all duration-300"
             style={{ width: `${Math.min(100, (relationships.length / (concepts.length || 1)) * 40)}%` }}
