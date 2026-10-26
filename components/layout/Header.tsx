@@ -76,6 +76,23 @@ export const Header: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setViewMode('discoveries')}
+            className={`flex items-center space-x-1.5 px-3 py-1 rounded text-xs font-medium transition-all ${
+              viewMode === 'discoveries'
+                ? 'bg-cosmic-800 text-foreground border border-border shadow-sm'
+                : 'text-text-muted hover:text-foreground'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-discovery" />
+            <span>Discoveries</span>
+            {unreadDiscoveries > 0 && (
+              <span className="w-4 h-4 rounded-full bg-discovery text-[9px] font-mono flex items-center justify-center text-white font-bold ml-1">
+                {unreadDiscoveries}
+              </span>
+            )}
+          </button>
+
+          <button
             onClick={() => setViewMode('lab')}
             className={`flex items-center space-x-1.5 px-3 py-1 rounded text-xs font-medium transition-all ${
               viewMode === 'lab'
@@ -83,10 +100,10 @@ export const Header: React.FC = () => {
                 : 'text-text-muted hover:text-foreground'
             }`}
           >
-            <FlaskConical className="w-3.5 h-3.5 text-discovery" />
+            <FlaskConical className="w-3.5 h-3.5 text-causal-light" />
             <span>Discovery Lab</span>
             {activeLabs > 0 && (
-              <span className="w-4 h-4 rounded-full bg-discovery text-[9px] font-mono flex items-center justify-center text-white font-bold ml-1">
+              <span className="w-4 h-4 rounded-full bg-causal text-[9px] font-mono flex items-center justify-center text-white font-bold ml-1">
                 {activeLabs}
               </span>
             )}

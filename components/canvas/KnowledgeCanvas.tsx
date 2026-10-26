@@ -44,8 +44,10 @@ const CanvasInner: React.FC = () => {
   const {
     concepts,
     relationships,
+    discoveryCandidates,
     selectedConceptId,
     selectedRelationshipId,
+    selectedDiscoveryId,
     selectedDomainFilter,
     searchQuery,
     selectConcept,
@@ -57,6 +59,10 @@ const CanvasInner: React.FC = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const activeDiscovery = useMemo(() => {
+    return discoveryCandidates.find((d) => d.id === selectedDiscoveryId);
+  }, [discoveryCandidates, selectedDiscoveryId]);
 
   // Convert concepts & relationships to React Flow nodes and edges
   const initialNodes: Node[] = useMemo(() => {
@@ -76,6 +82,12 @@ const CanvasInner: React.FC = () => {
       const posX = baseOffset.x + (domainIndex % 2 === 0 ? 0 : 260);
       const posY = baseOffset.y + Math.floor(domainIndex / 2) * 150;
 
+      const isPartOfActiveDiscovery =
+        activeDiscovery &&
+        (activeDiscovery.conceptAId === concept.id || activeDiscovery.conceptBId === concept.id);
+
+      const isNodeSelected = selectedConceptId === concept.id || !!isPartOfActiveDiscovery;
+
       const matchesSearch =
         !searchQuery ||
         concept.canonicalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -83,7 +95,7 @@ const CanvasInner: React.FC = () => {
         concept.domainCategory.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesDomain = !selectedDomainFilter || concept.domainCategory === selectedDomainFilter;
-      const isVisible = matchesSearch && matchesDomain;
+      const isVisible = (matchesSearch && matchesDomain) || !!isPartOfActiveDiscovery;
 
       return {
         id: concept.id,
@@ -92,19 +104,19 @@ const CanvasInner: React.FC = () => {
         data: {
           concept,
           connectionCount,
-          isSelected: selectedConceptId === concept.id,
+          isSelected: isNodeSelected,
         },
         style: {
           opacity: isVisible ? 1 : 0.2,
           transition: 'opacity 0.2s ease',
         },
-        selected: selectedConceptId === concept.id,
+        selected: isNodeSelected,
       };
     });
-  }, [concepts, relationships, selectedConceptId, selectedDomainFilter, searchQuery]);
+  }, [concepts, relationships, selectedConceptId, activeDiscovery, selectedDomainFilter, searchQuery]);
 
   const initialEdges: Edge[] = useMemo(() => {
-    return relationships.map((rel) => {
+    const regularEdges: Edge[] = relationships.map((rel) => {
       return {
         id: rel.id,
         source: rel.sourceConceptId,
@@ -123,7 +135,45 @@ const CanvasInner: React.FC = () => {
         },
       };
     });
-  }, [relationships, selectedRelationshipId]);
+
+    // If an active discovery is selected, inject a distinctive proposed edge
+    if (activeDiscovery) {
+      regularEdges.push({
+        id: `proposed-${activeDiscovery.id}`,
+        source: activeDiscovery.conceptAId,
+        target: activeDiscovery.conceptBId,
+        type: 'typedEdge',
+        data: {
+          relationship: {
+            id: `proposed-${activeDiscovery.id}`,
+            userId: 'user-default',
+            sourceConceptId: activeDiscovery.conceptAId,
+            targetConceptId: activeDiscovery.conceptBId,
+            relationshipType: activeDiscovery.proposedRelationship,
+            directional: true,
+            confidenceScore: activeDiscovery.compositeScore,
+            status: 'proposed',
+            rationale: `PROPOSED (${activeDiscovery.discoveryType.replace(/_/g, ' ')}): ${activeDiscovery.explanation}`,
+            createdAt: activeDiscovery.createdAt,
+          },
+          isSelected: true,
+        },
+        selected: true,
+        style: {
+          strokeDasharray: '6,6',
+          strokeWidth: 3,
+        },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: activeDiscovery.proposedRelationship === 'contradicts' ? '#F43F5E' : '#8B5CF6',
+          width: 16,
+          height: 16,
+        },
+      });
+    }
+
+    return regularEdges;
+  }, [relationships, selectedRelationshipId, activeDiscovery]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);

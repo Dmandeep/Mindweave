@@ -7,6 +7,7 @@ import { NavSidebar } from '@/components/layout/NavSidebar';
 import { InspectorPanel } from '@/components/layout/InspectorPanel';
 import { KnowledgeCanvas } from '@/components/canvas/KnowledgeCanvas';
 import { DiscoveryLabWorkbench } from '@/components/lab/DiscoveryLabWorkbench';
+import { DiscoveriesWorkspace } from '@/components/discoveries/DiscoveriesWorkspace';
 import { CaptureModal } from '@/components/capture/CaptureModal';
 
 export default function Home() {
@@ -22,13 +23,11 @@ export default function Home() {
         {/* Left Column: Nav Sidebar & Discovery Feed */}
         <NavSidebar />
 
-        {/* Center Area: Interactive Knowledge Universe or Discovery Lab Workbench */}
+        {/* Center Area: Knowledge Universe, Discoveries Feed, or Discovery Lab */}
         <main className="flex-1 relative overflow-hidden flex flex-col h-full min-h-0 w-full bg-cosmic-950">
-          {viewMode === 'universe' ? (
-            <KnowledgeCanvas />
-          ) : (
-            <DiscoveryLabWorkbench />
-          )}
+          {viewMode === 'universe' && <KnowledgeCanvas />}
+          {viewMode === 'discoveries' && <DiscoveriesWorkspace />}
+          {viewMode === 'lab' && <DiscoveryLabWorkbench />}
         </main>
 
         {/* Right Column: Contextual Inspector Panel */}

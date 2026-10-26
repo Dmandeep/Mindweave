@@ -1,13 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { AutonomousDiscoveryEngine } from '../lib/discovery/discoveryEngine';
-import type { Concept, Relationship } from '../types/knowledge';
+import type { Concept, Relationship, DiscoveryCandidate } from '../types/knowledge';
 
 const makeConcept = (overrides: Partial<Concept>): Concept => ({
   id: 'c-test',
   userId: 'user-default',
   canonicalName: 'Test Concept',
   aliases: [],
-  description: 'A test concept.',
+  description: 'A test concept description with sufficient length to model genuine semantic knowledge representation.',
   domainCategory: 'General',
   createdAt: new Date().toISOString(),
   ...overrides,
@@ -32,13 +32,13 @@ describe('AutonomousDiscoveryEngine', () => {
       makeConcept({
         id: 'c-raft',
         canonicalName: 'Raft Consensus',
-        description: 'Time-bounded leadership authorization mechanism preventing split-brain reads.',
+        description: 'Time-bounded leadership authorization mechanism preventing split-brain reads across cluster replicas.',
         domainCategory: 'Distributed Systems',
       }),
       makeConcept({
         id: 'c-microglia',
         canonicalName: 'Microglial Pruning',
-        description: 'Neuroimmune cells that prune synapses using complement signaling cascades.',
+        description: 'Neuroimmune cells that prune synapses using complement signaling cascades during neural development.',
         domainCategory: 'Neuroscience',
       }),
     ];
@@ -102,19 +102,19 @@ describe('AutonomousDiscoveryEngine', () => {
       makeConcept({
         id: 'c-1',
         canonicalName: 'Concept A',
-        description: 'Distributed consensus with leader leases.',
+        description: 'Distributed consensus with leader leases to prevent split-brain states.',
         domainCategory: 'Distributed Systems',
       }),
       makeConcept({
         id: 'c-2',
         canonicalName: 'Concept B',
-        description: 'Synaptic pruning mechanisms in development.',
+        description: 'Synaptic pruning mechanisms in developmental neurobiology.',
         domainCategory: 'Neuroscience',
       }),
       makeConcept({
         id: 'c-3',
         canonicalName: 'Concept C',
-        description: 'Solid-state battery electrolyte degradation risk.',
+        description: 'Solid-state battery electrolyte degradation under thermal cycle stress.',
         domainCategory: 'Materials Science',
       }),
     ];
@@ -127,25 +127,96 @@ describe('AutonomousDiscoveryEngine', () => {
     }
   });
 
-  it('assigns correct discoveryType for cross-domain analogies', () => {
+  it('preserves existing candidate status (pinned, investigating) across repeated scans without creating duplicates', () => {
     const concepts: Concept[] = [
       makeConcept({
         id: 'c-ds',
-        canonicalName: 'Paxos',
-        description: 'Consensus algorithm for state machine replication.',
+        canonicalName: 'Raft Leases',
+        description: 'Leader lease bounds in distributed consensus.',
         domainCategory: 'Distributed Systems',
       }),
       makeConcept({
         id: 'c-bio',
-        canonicalName: 'Quorum Sensing',
-        description: 'Bacterial collective behavior through signal molecules.',
+        canonicalName: 'Pheromone Evaporation',
+        description: 'Temporal decay rates in insect quorum sensing.',
         domainCategory: 'Neuroscience',
+      }),
+    ];
+
+    // First scan creates discovery
+    const firstRun = AutonomousDiscoveryEngine.runDiscoveryScan(concepts, []);
+    expect(firstRun.length).toBe(1);
+
+    // User pins the discovery
+    const pinnedCandidate: DiscoveryCandidate = {
+      ...firstRun[0],
+      status: 'pinned',
+    };
+
+    // Second scan with existing candidates
+    const secondRun = AutonomousDiscoveryEngine.runDiscoveryScan(
+      concepts,
+      [],
+      [pinnedCandidate]
+    );
+
+    expect(secondRun.length).toBe(1); // No duplicates!
+    expect(secondRun[0].status).toBe('pinned'); // Status preserved!
+    expect(secondRun[0].id).toBe(pinnedCandidate.id); // Same ID!
+  });
+
+  it('generates 7-part structured explanations with provenance tags', () => {
+    const concepts: Concept[] = [
+      makeConcept({
+        id: 'c-algo',
+        canonicalName: 'Stigmergy Quorum',
+        description: 'Decentralized scout signaling in collective colonies.',
+        domainCategory: 'Neuroscience',
+      }),
+      makeConcept({
+        id: 'c-db',
+        canonicalName: 'Raft Monotonic Clocks',
+        description: 'Cluster physical clock drift bounds preventing leader split brain.',
+        domainCategory: 'Distributed Systems',
       }),
     ];
 
     const result = AutonomousDiscoveryEngine.runDiscoveryScan(concepts, []);
     expect(result.length).toBeGreaterThan(0);
-    // Cross-domain pairs without direct tension keywords should be analogies or structural holes
-    expect(['cross_domain_analogy', 'structural_hole_bridge']).toContain(result[0].discoveryType);
+    const candidate = result[0];
+
+    expect(candidate.structuredExplanation).toBeDefined();
+    expect(candidate.structuredExplanation?.mechanism).toBeDefined();
+    expect(candidate.structuredExplanation?.whyItMatters).toBeDefined();
+    expect(candidate.structuredExplanation?.uncertainty).toBeDefined();
+    expect(candidate.structuredExplanation?.investigationAngle).toBeDefined();
+    expect(candidate.structuredExplanation?.falsificationCondition).toBeDefined();
+    expect(candidate.whyItMatters).toBeDefined();
+    expect(['INFERRED', 'HYPOTHESIS', 'OBSERVED', 'CALCULATED']).toContain(candidate.provenanceType);
+  });
+
+  it('produces an accurate scan telemetry report in runDiscoveryScanWithReport', async () => {
+    const concepts: Concept[] = [
+      makeConcept({
+        id: 'c-1',
+        canonicalName: 'Consensus',
+        description: 'Distributed fault tolerant state machines.',
+        domainCategory: 'Distributed Systems',
+      }),
+      makeConcept({
+        id: 'c-2',
+        canonicalName: 'Synapse Pruning',
+        description: 'Cellular neuroimmune remodeling.',
+        domainCategory: 'Neuroscience',
+      }),
+    ];
+
+    const report = await AutonomousDiscoveryEngine.runDiscoveryScanWithReport(concepts, []);
+
+    expect(report.totalScannedPairs).toBe(1);
+    expect(report.newCandidatesCount).toBe(1);
+    expect(report.candidates.length).toBe(1);
+    expect(report.filteredOutTautologies).toBeGreaterThanOrEqual(0);
+    expect(report.filteredOutNoise).toBeGreaterThanOrEqual(0);
   });
 });

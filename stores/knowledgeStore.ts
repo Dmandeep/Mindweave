@@ -10,7 +10,7 @@ import {
   RelationshipStatus,
   InvestigationOutcome
 } from '@/types/knowledge';
-import { AutonomousDiscoveryEngine } from '@/lib/discovery/discoveryEngine';
+import { AutonomousDiscoveryEngine, DiscoveryScanReport } from '@/lib/discovery/discoveryEngine';
 
 interface KnowledgeState {
   // Data entities
@@ -22,7 +22,7 @@ interface KnowledgeState {
   revisions: KnowledgeRevision[];
 
   // View & Selection states
-  viewMode: 'universe' | 'lab';
+  viewMode: 'universe' | 'discoveries' | 'lab';
   selectedConceptId: string | null;
   selectedRelationshipId: string | null;
   selectedDiscoveryId: string | null;
@@ -30,9 +30,11 @@ interface KnowledgeState {
   searchQuery: string;
   selectedDomainFilter: string | null;
   isCaptureModalOpen: boolean;
+  isScanningDiscoveries: boolean;
+  lastScanReport: DiscoveryScanReport | null;
 
   // Actions
-  setViewMode: (mode: 'universe' | 'lab') => void;
+  setViewMode: (mode: 'universe' | 'discoveries' | 'lab') => void;
   selectConcept: (id: string | null) => void;
   selectRelationship: (id: string | null) => void;
   selectDiscovery: (id: string | null) => void;
@@ -43,13 +45,16 @@ interface KnowledgeState {
 
   // Workflow Mutations
   addSourceAndExtract: (title: string, content: string, sourceType?: 'text' | 'markdown') => void;
+  triggerDiscoveryScan: () => Promise<DiscoveryScanReport>;
   promoteDiscoveryToLab: (discoveryId: string) => string;
   updateHypothesis: (investigationId: string, statement: string, assumptions: string[]) => void;
   updateExperimentPlan: (investigationId: string, title: string, methodology: string, criteria: any[]) => void;
   recordObservation: (investigationId: string, observations: string) => void;
   reconcileInvestigationOutcome: (investigationId: string, outcome: InvestigationOutcome) => void;
-  dismissDiscovery: (discoveryId: string) => void;
+  dismissDiscovery: (discoveryId: string, reason?: string) => void;
+  rejectDiscovery: (discoveryId: string, reason?: string) => void;
   pinDiscovery: (discoveryId: string) => void;
+  locateDiscoveryInUniverse: (discoveryId: string) => void;
 }
 
 // Initial Seed Data across Distributed Systems, Biology, Materials, and Macroeconomics
@@ -270,6 +275,8 @@ export const useKnowledgeStore = create<KnowledgeState>()(
   searchQuery: '',
   selectedDomainFilter: null,
   isCaptureModalOpen: false,
+  isScanningDiscoveries: false,
+  lastScanReport: null,
 
   setViewMode: (mode) => set({ viewMode: mode }),
   selectConcept: (id) => set({ selectedConceptId: id, selectedRelationshipId: null, selectedDiscoveryId: null }),
@@ -342,6 +349,7 @@ export const useKnowledgeStore = create<KnowledgeState>()(
     const newDiscoveries = AutonomousDiscoveryEngine.runDiscoveryScan(
       updatedConcepts,
       updatedRelationships,
+      get().discoveryCandidates,
       'user-default'
     );
 
@@ -524,12 +532,54 @@ export const useKnowledgeStore = create<KnowledgeState>()(
     }));
   },
 
-  dismissDiscovery: (discoveryId) => {
+  triggerDiscoveryScan: async () => {
+    set({ isScanningDiscoveries: true });
+    try {
+      const report = await AutonomousDiscoveryEngine.runDiscoveryScanWithReport(
+        get().concepts,
+        get().relationships,
+        get().discoveryCandidates,
+        'user-default'
+      );
+      set({
+        discoveryCandidates: report.candidates,
+        lastScanReport: report,
+        isScanningDiscoveries: false,
+      });
+      return report;
+    } catch (err) {
+      set({ isScanningDiscoveries: false });
+      throw err;
+    }
+  },
+
+  dismissDiscovery: (discoveryId, reason) => {
     set((state) => ({
       discoveryCandidates: state.discoveryCandidates.map((d) =>
-        d.id === discoveryId ? { ...d, status: 'dismissed' } : d
+        d.id === discoveryId ? { ...d, status: 'dismissed', dismissedReason: reason || 'Dismissed by user' } : d
       ),
       selectedDiscoveryId: null
+    }));
+  },
+
+  rejectDiscovery: (discoveryId, reason) => {
+    const disc = get().discoveryCandidates.find((d) => d.id === discoveryId);
+    const revision: KnowledgeRevision = {
+      id: `rev-${Date.now()}`,
+      userId: 'user-default',
+      entityType: 'relationship',
+      entityId: discoveryId,
+      previousState: { status: disc?.status || 'unread' },
+      newState: { status: 'dismissed', reason: reason || 'Rejected proposed relationship' },
+      reason: `Discovery rejected: ${reason || 'User determined connection is invalid or non-viable'}`,
+      timestamp: new Date().toISOString(),
+    };
+    set((state) => ({
+      discoveryCandidates: state.discoveryCandidates.map((d) =>
+        d.id === discoveryId ? { ...d, status: 'dismissed', dismissedReason: reason || 'Rejected by user' } : d
+      ),
+      revisions: [revision, ...state.revisions],
+      selectedDiscoveryId: null,
     }));
   },
 
@@ -539,6 +589,15 @@ export const useKnowledgeStore = create<KnowledgeState>()(
         d.id === discoveryId ? { ...d, status: 'pinned' } : d
       )
     }));
+  },
+
+  locateDiscoveryInUniverse: (discoveryId) => {
+    const disc = get().discoveryCandidates.find((d) => d.id === discoveryId);
+    set({
+      selectedDiscoveryId: discoveryId,
+      selectedConceptId: disc ? disc.conceptAId : null,
+      viewMode: 'universe',
+    });
   }
 }),
 {
