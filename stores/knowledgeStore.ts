@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { 
   Concept, 
   Relationship, 
@@ -232,7 +233,9 @@ const INITIAL_DISCOVERIES: DiscoveryCandidate[] = [
   }
 ];
 
-export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
+export const useKnowledgeStore = create<KnowledgeState>()(
+  persist(
+    (set, get) => ({
   sources: [
     {
       id: 'src-raft-doc',
@@ -507,4 +510,21 @@ export const useKnowledgeStore = create<KnowledgeState>((set, get) => ({
       )
     }));
   }
-}));
+}),
+{
+  name: 'web-of-thoughts-knowledge-store',
+  storage: createJSONStorage(() => (typeof window !== 'undefined' ? localStorage : {
+    getItem: () => null,
+    setItem: () => {},
+    removeItem: () => {},
+  })),
+  partialize: (state) => ({
+    sources: state.sources,
+    concepts: state.concepts,
+    relationships: state.relationships,
+    discoveryCandidates: state.discoveryCandidates,
+    investigations: state.investigations,
+    revisions: state.revisions,
+  }),
+}
+));
