@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useKnowledgeStore } from '@/stores/knowledgeStore';
-import { X, Sparkles, FileText, ArrowRight } from 'lucide-react';
+import { X, Sparkles, ArrowRight } from 'lucide-react';
 
 export const CaptureModal: React.FC = () => {
   const { isCaptureModalOpen, setCaptureModalOpen, addSourceAndExtract } = useKnowledgeStore();
@@ -22,27 +22,31 @@ export const CaptureModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 backdrop-blur-xs animate-fade-in select-none"
+      onClick={() => setCaptureModalOpen(false)}
+    >
       <div 
-        className="w-full max-w-xl bg-cosmic-900 border border-border rounded-xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-lg bg-white border border-ink/12 rounded-xl shadow-xl overflow-hidden flex flex-col animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between bg-cosmic-950/60">
+        <div className="p-3.5 border-b border-ink/10 flex items-center justify-between bg-cream-100">
           <div className="flex items-center space-x-2">
-            <div className="w-6 h-6 rounded bg-discovery/20 flex items-center justify-center text-discovery">
+            <div className="w-6 h-6 rounded-md bg-royal-subtle flex items-center justify-center text-royal border border-royal/20">
               <Sparkles className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-text-primary">Frictionless Knowledge Capture</h3>
-              <p className="text-[11px] text-text-muted">
-                Capture ideas, papers, or observations. Concepts and relationships will be extracted automatically.
+              <h3 className="text-xs font-semibold text-ink-primary">Knowledge Note Capture</h3>
+              <p className="text-[10px] text-ink-muted">
+                Capture research observations. Concepts and relationships will be extracted automatically.
               </p>
             </div>
           </div>
           <button
             onClick={() => setCaptureModalOpen(false)}
-            className="p-1 rounded text-text-muted hover:text-text-primary hover:bg-cosmic-800 transition-colors"
+            className="p-1 rounded text-ink-muted hover:text-ink-primary hover:bg-cream-200 transition-colors"
+            aria-label="Close capture modal"
           >
             <X className="w-4 h-4" />
           </button>
@@ -51,7 +55,7 @@ export const CaptureModal: React.FC = () => {
         {/* Modal Form */}
         <form onSubmit={handleSubmit} className="p-4 space-y-3">
           <div>
-            <label className="text-xs font-medium text-text-secondary block mb-1">
+            <label className="text-[11px] font-medium text-ink-secondary block mb-1">
               Note Title or Subject
             </label>
             <input
@@ -59,63 +63,71 @@ export const CaptureModal: React.FC = () => {
               placeholder="e.g. Asynchronous Paxos Consensus Benchmarks"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-cosmic-950 border border-border text-xs rounded-md px-3 py-2 text-foreground placeholder:text-text-muted focus:outline-none focus:border-discovery/60 focus:ring-1 focus:ring-discovery/30"
+              className="w-full bg-cream-100 border border-ink/10 text-xs rounded-md px-2.5 py-1.5 text-ink-primary placeholder:text-ink-muted focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-medium text-text-secondary">
+              <label className="text-[11px] font-medium text-ink-secondary">
                 Raw Content / Research Notes
               </label>
-              <div className="flex items-center space-x-2 text-[10px]">
+              <div className="flex items-center space-x-1.5 text-[10px]">
                 <button
                   type="button"
                   onClick={() => setSourceType('text')}
-                  className={`px-2 py-0.5 rounded ${sourceType === 'text' ? 'bg-discovery/20 text-discovery-light' : 'text-text-muted'}`}
+                  className={`px-2 py-0.5 rounded transition-colors ${
+                    sourceType === 'text' 
+                      ? 'bg-royal text-white font-medium shadow-2xs' 
+                      : 'text-ink-muted hover:text-ink-primary'
+                  }`}
                 >
                   Plain Text
                 </button>
                 <button
                   type="button"
                   onClick={() => setSourceType('markdown')}
-                  className={`px-2 py-0.5 rounded ${sourceType === 'markdown' ? 'bg-discovery/20 text-discovery-light' : 'text-text-muted'}`}
+                  className={`px-2 py-0.5 rounded transition-colors ${
+                    sourceType === 'markdown' 
+                      ? 'bg-royal text-white font-medium shadow-2xs' 
+                      : 'text-ink-muted hover:text-ink-primary'
+                  }`}
                 >
                   Markdown
                 </button>
               </div>
             </div>
             <textarea
-              rows={8}
-              placeholder="Paste research text, hypotheses, paper excerpts, or architectural specifications here..."
+              rows={6}
+              placeholder="Paste empirical observations, paper excerpts, or research ideas..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              className="w-full bg-cream-100 border border-ink/10 text-xs rounded-md px-2.5 py-2 text-ink-primary placeholder:text-ink-muted focus:outline-none focus:border-royal focus:ring-1 focus:ring-royal/30 font-mono leading-relaxed"
               required
-              className="w-full bg-cosmic-950 border border-border text-xs rounded-md p-3 text-foreground placeholder:text-text-muted focus:outline-none focus:border-discovery/60 focus:ring-1 focus:ring-discovery/30 leading-relaxed font-mono"
             />
-            <div className="flex justify-between items-center text-[10px] text-text-muted mt-1">
-              <span>Supports dual-use and technical research safely</span>
-              <span>{content.length} characters</span>
-            </div>
           </div>
 
-          {/* Modal Actions */}
-          <div className="pt-2 flex items-center justify-end space-x-2">
-            <button
-              type="button"
-              onClick={() => setCaptureModalOpen(false)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium text-text-muted hover:text-text-primary hover:bg-cosmic-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!content.trim()}
-              className="flex items-center space-x-1.5 bg-discovery hover:bg-discovery-dark disabled:opacity-40 text-white px-4 py-1.5 rounded-md text-xs font-medium transition-all shadow-sm shadow-discovery/30"
-            >
-              <span>Extract & Connect</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+          {/* Modal Footer */}
+          <div className="pt-2 flex items-center justify-between">
+            <span className="text-[10px] text-ink-muted font-mono">
+              Auto-extracts nodes &amp; computes Goldilocks cross-domain bridges
+            </span>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => setCaptureModalOpen(false)}
+                className="px-3 py-1.5 rounded-md text-xs text-ink-muted hover:text-ink-primary hover:bg-cream-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-royal hover:bg-royal-hover text-white px-3.5 py-1.5 rounded-md text-xs font-medium flex items-center space-x-1.5 shadow-xs transition-all active:scale-98"
+              >
+                <span>Ingest &amp; Extract</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </form>
       </div>

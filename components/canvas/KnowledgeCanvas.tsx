@@ -17,7 +17,7 @@ import {
 import { useKnowledgeStore } from '@/stores/knowledgeStore';
 import { ConceptNode } from './nodes/ConceptNode';
 import { TypedEdge } from './edges/TypedEdge';
-import { Sparkles, Compass, Network, Filter } from 'lucide-react';
+import { Compass, Filter, Layers, X } from 'lucide-react';
 
 const nodeTypes = {
   conceptNode: ConceptNode,
@@ -27,17 +27,16 @@ const edgeTypes = {
   typedEdge: TypedEdge,
 };
 
-// Initial position coordinate offsets by domain category for intuitive galactic clustering
 const DOMAIN_OFFSETS: Record<string, { x: number; y: number }> = {
-  'Distributed Systems': { x: -480, y: -240 },
-  'Evolutionary Biology': { x: 240, y: -240 },
-  'Immunology': { x: -480, y: 240 },
-  'Neurobiology': { x: 240, y: 240 },
-  'Energy & Materials': { x: -120, y: -450 },
-  'Mechanical Engineering': { x: -120, y: 450 },
-  'Neuroscience': { x: 240, y: 240 },
-  'Materials Science': { x: -120, y: -450 },
-  'Macroeconomics': { x: 480, y: 0 },
+  'Distributed Systems': { x: -440, y: -220 },
+  'Evolutionary Biology': { x: 220, y: -220 },
+  'Immunology': { x: -440, y: 220 },
+  'Neurobiology': { x: 220, y: 220 },
+  'Energy & Materials': { x: -110, y: -420 },
+  'Mechanical Engineering': { x: -110, y: 420 },
+  'Neuroscience': { x: 220, y: 220 },
+  'Materials Science': { x: -110, y: -420 },
+  'Macroeconomics': { x: 440, y: 0 },
 };
 
 const CanvasInner: React.FC = () => {
@@ -72,15 +71,15 @@ const CanvasInner: React.FC = () => {
       ).length;
 
       const baseOffset = DOMAIN_OFFSETS[concept.domainCategory] || {
-        x: Math.cos((index * 2 * Math.PI) / Math.max(concepts.length, 1)) * 360,
-        y: Math.sin((index * 2 * Math.PI) / Math.max(concepts.length, 1)) * 360,
+        x: Math.cos((index * 2 * Math.PI) / Math.max(concepts.length, 1)) * 340,
+        y: Math.sin((index * 2 * Math.PI) / Math.max(concepts.length, 1)) * 340,
       };
 
       const domainMatches = concepts.filter((c) => c.domainCategory === concept.domainCategory);
       const domainIndex = domainMatches.findIndex((c) => c.id === concept.id);
 
-      const posX = baseOffset.x + (domainIndex % 2 === 0 ? 0 : 260);
-      const posY = baseOffset.y + Math.floor(domainIndex / 2) * 150;
+      const posX = baseOffset.x + (domainIndex % 2 === 0 ? 0 : 250);
+      const posY = baseOffset.y + Math.floor(domainIndex / 2) * 140;
 
       const isPartOfActiveDiscovery =
         activeDiscovery &&
@@ -106,17 +105,33 @@ const CanvasInner: React.FC = () => {
           connectionCount,
           isSelected: isNodeSelected,
         },
-        style: {
-          opacity: isVisible ? 1 : 0.2,
-          transition: 'opacity 0.2s ease',
-        },
         selected: isNodeSelected,
+        hidden: !isVisible,
       };
     });
-  }, [concepts, relationships, selectedConceptId, activeDiscovery, selectedDomainFilter, searchQuery]);
+  }, [
+    concepts,
+    relationships,
+    selectedConceptId,
+    activeDiscovery,
+    searchQuery,
+    selectedDomainFilter,
+  ]);
 
   const initialEdges: Edge[] = useMemo(() => {
-    const regularEdges: Edge[] = relationships.map((rel) => {
+    return relationships.map((rel) => {
+      const isSelected = selectedRelationshipId === rel.id;
+      const isConnectedToSelectedNode =
+        selectedConceptId &&
+        (rel.sourceConceptId === selectedConceptId || rel.targetConceptId === selectedConceptId);
+
+      const isPartofActiveDiscovery =
+        activeDiscovery &&
+        ((rel.sourceConceptId === activeDiscovery.conceptAId && rel.targetConceptId === activeDiscovery.conceptBId) ||
+          (rel.sourceConceptId === activeDiscovery.conceptBId && rel.targetConceptId === activeDiscovery.conceptAId));
+
+      const isHighlighted = isSelected || isConnectedToSelectedNode || isPartofActiveDiscovery;
+
       return {
         id: rel.id,
         source: rel.sourceConceptId,
@@ -124,61 +139,27 @@ const CanvasInner: React.FC = () => {
         type: 'typedEdge',
         data: {
           relationship: rel,
-          isSelected: selectedRelationshipId === rel.id,
+          isSelected: isHighlighted,
         },
-        selected: selectedRelationshipId === rel.id,
         markerEnd: {
           type: MarkerType.ArrowClosed,
-          color: rel.relationshipType === 'contradicts' ? '#F43F5E' : '#8B5CF6',
-          width: 14,
-          height: 14,
+          width: 12,
+          height: 12,
+          color: isHighlighted ? '#315FE9' : 'rgba(37, 37, 37, 0.35)',
         },
+        animated: isPartofActiveDiscovery || rel.status === 'proposed',
       };
     });
-
-    // If an active discovery is selected, inject a distinctive proposed edge
-    if (activeDiscovery) {
-      regularEdges.push({
-        id: `proposed-${activeDiscovery.id}`,
-        source: activeDiscovery.conceptAId,
-        target: activeDiscovery.conceptBId,
-        type: 'typedEdge',
-        data: {
-          relationship: {
-            id: `proposed-${activeDiscovery.id}`,
-            userId: 'user-default',
-            sourceConceptId: activeDiscovery.conceptAId,
-            targetConceptId: activeDiscovery.conceptBId,
-            relationshipType: activeDiscovery.proposedRelationship,
-            directional: true,
-            confidenceScore: activeDiscovery.compositeScore,
-            status: 'proposed',
-            rationale: `PROPOSED (${activeDiscovery.discoveryType.replace(/_/g, ' ')}): ${activeDiscovery.explanation}`,
-            createdAt: activeDiscovery.createdAt,
-          },
-          isSelected: true,
-        },
-        selected: true,
-        style: {
-          strokeDasharray: '6,6',
-          strokeWidth: 3,
-        },
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: activeDiscovery.proposedRelationship === 'contradicts' ? '#F43F5E' : '#8B5CF6',
-          width: 16,
-          height: 16,
-        },
-      });
-    }
-
-    return regularEdges;
-  }, [relationships, selectedRelationshipId, activeDiscovery]);
+  }, [
+    relationships,
+    selectedRelationshipId,
+    selectedConceptId,
+    activeDiscovery,
+  ]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  // Sync state when store concepts or relationships change
   useEffect(() => {
     setNodes(initialNodes);
   }, [initialNodes, setNodes]);
@@ -187,7 +168,6 @@ const CanvasInner: React.FC = () => {
     setEdges(initialEdges);
   }, [initialEdges, setEdges]);
 
-  // Handle Node click
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
       selectConcept(node.id);
@@ -195,7 +175,6 @@ const CanvasInner: React.FC = () => {
     [selectConcept]
   );
 
-  // Handle Edge click
   const onEdgeClick = useCallback(
     (_: React.MouseEvent, edge: Edge) => {
       selectRelationship(edge.id);
@@ -203,14 +182,13 @@ const CanvasInner: React.FC = () => {
     [selectRelationship]
   );
 
-  // Handle Canvas background click (clear selections)
   const onPaneClick = useCallback(() => {
     selectConcept(null);
     selectRelationship(null);
   }, [selectConcept, selectRelationship]);
 
   return (
-    <div className="relative w-full h-full bg-cosmic-950 overflow-hidden select-none">
+    <div className="relative w-full h-full bg-cream overflow-hidden select-none animate-fade-in">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -222,7 +200,7 @@ const CanvasInner: React.FC = () => {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.25 }}
+        fitViewOptions={{ padding: 0.2 }}
         minZoom={0.2}
         maxZoom={2}
         className="touch-none"
@@ -230,68 +208,84 @@ const CanvasInner: React.FC = () => {
         <Background
           variant={BackgroundVariant.Dots}
           gap={24}
-          size={1.5}
-          color="#1A243D"
+          size={1.2}
+          color="rgba(37, 37, 37, 0.12)"
         />
         <Controls
           showInteractive={false}
-          className="!bottom-6 !left-6 !bg-cosmic-900/90 !border-cosmic-700/60 !rounded-xl !overflow-hidden !shadow-xl"
+          className="!bottom-5 !left-5 !bg-white !border-ink/12 !rounded-md !overflow-hidden !shadow-sm"
         />
         <MiniMap
-          nodeStrokeColor="#8B5CF6"
-          nodeColor="#131B2E"
-          nodeBorderRadius={4}
-          maskColor="rgba(8, 12, 20, 0.75)"
-          className="!bottom-6 !right-6 !bg-cosmic-900/90 !border-cosmic-700/60 !rounded-xl !shadow-xl !w-44 !h-32 hidden md:block"
+          nodeStrokeColor="#315FE9"
+          nodeColor="#FFFFFF"
+          nodeBorderRadius={3}
+          maskColor="rgba(250, 247, 240, 0.75)"
+          className="!bottom-5 !right-5 !bg-white/90 !border-ink/12 !rounded-md !shadow-sm !w-40 !h-28 hidden md:block"
         />
       </ReactFlow>
 
-      {/* Canvas Top Bar HUD */}
-      <div className="absolute top-4 left-6 right-6 flex items-center justify-between pointer-events-none z-10">
+      {/* Floating Canvas HUD */}
+      <div className="absolute top-3.5 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
         <div className="flex items-center gap-2 pointer-events-auto">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cosmic-900/80 backdrop-blur-md border border-cosmic-700/60 shadow-lg text-xs text-cosmic-300">
-            <Compass className="w-3.5 h-3.5 text-discovery-400 animate-spin-slow" />
-            <span className="font-medium text-cosmic-100">Knowledge Universe</span>
-            <span className="text-cosmic-500">•</span>
-            <span className="font-mono">{concepts.length} Concepts</span>
-            <span className="text-cosmic-500">•</span>
-            <span className="font-mono">{relationships.length} Links</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/95 backdrop-blur-md border border-ink/12 shadow-xs text-xs text-ink-secondary">
+            <Compass className="w-3.5 h-3.5 text-royal" />
+            <span className="font-semibold text-ink-primary">Knowledge Graph</span>
+            <span className="text-ink-faint">•</span>
+            <span className="font-mono text-ink-muted">{concepts.length} Concepts</span>
+            <span className="text-ink-faint">•</span>
+            <span className="font-mono text-ink-muted">{relationships.length} Links</span>
           </div>
 
           {selectedDomainFilter && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-discovery-500/10 border border-discovery-500/30 text-xs text-discovery-300 backdrop-blur-md">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-royal-subtle border border-royal/30 text-xs text-royal backdrop-blur-md font-medium">
               <Filter className="w-3 h-3" />
-              <span>Filtered: {selectedDomainFilter}</span>
+              <span>{selectedDomainFilter}</span>
               <button
                 onClick={() => setSelectedDomainFilter(null)}
-                className="ml-1 text-discovery-400 hover:text-white"
+                className="ml-1 text-ink-muted hover:text-ink-primary"
+                aria-label="Clear filter"
               >
-                ×
+                <X className="w-3 h-3" />
               </button>
             </div>
           )}
         </div>
 
-        {/* Legend Overlay */}
-        <div className="hidden lg:flex items-center gap-4 px-3.5 py-1.5 rounded-lg bg-cosmic-900/80 backdrop-blur-md border border-cosmic-700/60 shadow-lg text-[11px] text-cosmic-400 pointer-events-auto">
+        {/* Minimal Legend using Approved 4 Colors */}
+        <div className="hidden lg:flex items-center gap-4 px-3.5 py-1.5 rounded-md bg-white/95 backdrop-blur-md border border-ink/12 shadow-xs text-[11px] text-ink-secondary pointer-events-auto">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-            <span>Causes</span>
+            <span className="w-2 h-2 rounded-full bg-royal" />
+            <span>Active Edge</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-            <span>Contradicts</span>
+            <span className="w-2 h-2 rounded-full bg-tangerine" />
+            <span>Discovery Bridge</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-discovery-400"></span>
-            <span>Analogy</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            <span>Enables</span>
+            <span className="w-2 h-2 rounded-full bg-ink/40" />
+            <span>Established Link</span>
           </div>
         </div>
       </div>
+
+      {/* Empty State Overlay */}
+      {concepts.length === 0 && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-auto p-6 text-center z-10 bg-cream/90 backdrop-blur-xs animate-fade-in-up">
+          <div className="w-12 h-12 rounded-xl bg-white border border-ink/12 flex items-center justify-center text-ink-muted mb-3 shadow-xs">
+            <Layers className="w-6 h-6 text-royal" />
+          </div>
+          <h3 className="text-sm font-semibold text-ink-primary mb-1">Knowledge Universe is Empty</h3>
+          <p className="text-xs text-ink-muted max-w-sm mb-4 leading-relaxed">
+            Begin by capturing your first research note or observation. The Autonomous Discovery Engine will synthesize connections across your concepts.
+          </p>
+          <button
+            onClick={() => useKnowledgeStore.getState().setCaptureModalOpen(true)}
+            className="bg-royal hover:bg-royal-hover text-white text-xs px-3.5 py-1.5 rounded-md font-medium shadow-xs transition-all active:scale-98"
+          >
+            Capture First Idea
+          </button>
+        </div>
+      )}
     </div>
   );
 };

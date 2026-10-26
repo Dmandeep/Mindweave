@@ -1,12 +1,14 @@
 {
-  "name": "web-of-thoughts",
-  "version": "0.1.0",
+  "name": "mindweave",
+  "version": "1.0.0",
+  "description": "MindWeave — An AI-Powered Knowledge Discovery Platform. Weaving Knowledge Into Discovery.",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {

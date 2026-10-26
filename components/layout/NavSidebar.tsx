@@ -1,20 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useKnowledgeStore } from '@/stores/knowledgeStore';
 import { 
   Sparkles, 
   FlaskConical, 
   Filter, 
-  Clock, 
+  Pin, 
+  X, 
+  Layers, 
   CheckCircle2, 
-  AlertCircle, 
-  HelpCircle,
-  Pin,
-  X,
-  ArrowRight,
-  TrendingUp,
-  SlidersHorizontal
+  Activity
 } from 'lucide-react';
 
 export const NavSidebar: React.FC = () => {
@@ -22,231 +18,185 @@ export const NavSidebar: React.FC = () => {
     concepts,
     relationships,
     discoveryCandidates,
-    investigations,
     selectedDiscoveryId,
     selectDiscovery,
-    promoteDiscoveryToLab,
-    dismissDiscovery,
     pinDiscovery,
+    dismissDiscovery,
     selectedDomainFilter,
     setSelectedDomainFilter,
     viewMode,
-    setViewMode,
-    setActiveInvestigation
   } = useKnowledgeStore();
+
+  const [activeTab, setActiveTab] = useState<'discoveries' | 'domains'>('discoveries');
 
   // Extract unique domains from concepts
   const domains = Array.from(new Set(concepts.map((c) => c.domainCategory)));
 
-  // Filter discoveries (show unread and pinned by default)
+  // Active discoveries in feed
   const activeDiscoveries = discoveryCandidates.filter(
     (d) => d.status === 'unread' || d.status === 'pinned' || d.status === 'investigating'
   );
 
-  const acceptedCount = relationships.filter((r) => r.status === 'accepted').length;
-  const proposedCount = relationships.filter((r) => r.status === 'proposed').length;
-  const disputedCount = relationships.filter((r) => r.status === 'disputed').length;
-
   return (
-    <aside className="w-64 border-r border-border bg-cosmic-900 flex flex-col h-[calc(100vh-3.5rem)] select-none">
-      {/* Sidebar Header / Navigation Tabs */}
-      <div className="p-3 border-b border-border flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Sparkles className="w-4 h-4 text-discovery" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-text-primary">
-            Discovery Queue
-          </span>
-        </div>
-        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-discovery/20 text-discovery-light border border-discovery/30 font-bold">
-          {activeDiscoveries.length}
-        </span>
+    <aside className="w-60 border-r border-ink/10 bg-white flex flex-col h-[calc(100vh-3rem)] select-none shrink-0 hidden md:flex">
+      {/* Sidebar Mode Tabs */}
+      <div className="p-2 border-b border-ink/10 flex items-center gap-1 bg-cream-100">
+        <button
+          onClick={() => setActiveTab('discoveries')}
+          className={`flex-1 py-1 px-2 rounded text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors ${
+            activeTab === 'discoveries'
+              ? 'bg-white text-ink-primary border border-ink/10 shadow-xs'
+              : 'text-ink-muted hover:text-ink-primary'
+          }`}
+        >
+          <Sparkles className="w-3 h-3 text-tangerine" />
+          <span>Queue ({activeDiscoveries.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('domains')}
+          className={`flex-1 py-1 px-2 rounded text-xs font-medium flex items-center justify-center space-x-1.5 transition-colors ${
+            activeTab === 'domains'
+              ? 'bg-white text-ink-primary border border-ink/10 shadow-xs'
+              : 'text-ink-muted hover:text-ink-primary'
+          }`}
+        >
+          <Layers className="w-3 h-3 text-royal" />
+          <span>Domains ({domains.length})</span>
+        </button>
       </div>
 
-      {/* Discovery Feed Section */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
-        {activeDiscoveries.length === 0 ? (
-          <div className="text-center py-8 px-2 text-text-muted text-xs">
-            <Sparkles className="w-6 h-6 mx-auto mb-2 text-text-muted/40" />
-            <p className="font-medium text-text-secondary">Queue clear</p>
-            <p className="text-[11px] mt-1">Capture more notes to trigger autonomous cross-domain bridge scans.</p>
-          </div>
-        ) : (
-          activeDiscoveries.map((disc) => {
-            const isSelected = selectedDiscoveryId === disc.id;
-            return (
-              <div
-                key={disc.id}
-                onClick={() => selectDiscovery(disc.id)}
-                className={`p-3 rounded-lg border transition-all cursor-pointer relative group ${
-                  isSelected
-                    ? 'bg-cosmic-800 border-discovery shadow-md shadow-discovery/15 ring-1 ring-discovery/40'
-                    : 'bg-cosmic-950/60 border-border hover:bg-cosmic-800/80 hover:border-border-strong'
-                }`}
-              >
-                {/* Discovery Type & Novelty Badge */}
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-discovery/15 text-discovery-light border border-discovery/25">
-                    {disc.discoveryType.replace(/_/g, ' ')}
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-[10px] font-mono text-discovery font-semibold">
-                      {Math.round(disc.compositeScore * 100)}%
+      {/* Tab 1: Discovery Queue */}
+      {activeTab === 'discoveries' && (
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
+          {activeDiscoveries.length === 0 ? (
+            <div className="text-center py-10 px-3 text-ink-muted text-xs animate-fade-in">
+              <Sparkles className="w-5 h-5 mx-auto mb-2 text-ink-faint" />
+              <p className="font-medium text-ink-secondary">Queue clear</p>
+              <p className="text-[11px] mt-1 text-ink-muted">
+                Capture new notes to generate candidate bridges across concepts.
+              </p>
+            </div>
+          ) : (
+            activeDiscoveries.map((disc) => {
+              const isSelected = selectedDiscoveryId === disc.id;
+              const isPinned = disc.status === 'pinned';
+              const isInLab = disc.status === 'investigating';
+
+              return (
+                <div
+                  key={disc.id}
+                  onClick={() => selectDiscovery(disc.id)}
+                  className={`p-2.5 rounded-lg border transition-all cursor-pointer relative group ${
+                    isSelected
+                      ? 'bg-cream-100 border-royal shadow-xs ring-1 ring-royal/30'
+                      : 'bg-cream-50 border-ink/10 hover:bg-cream-100 hover:border-ink/20'
+                  }`}
+                >
+                  {/* Top metadata */}
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] font-mono uppercase tracking-wider text-ink-muted truncate max-w-[120px]">
+                      {disc.discoveryType.replace(/_/g, ' ')}
                     </span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-[10px] font-mono font-bold text-royal">
+                        {Math.round(disc.compositeScore * 100)}%
+                      </span>
+                      {isPinned && <Pin className="w-2.5 h-2.5 text-tangerine fill-tangerine" />}
+                      {isInLab && <FlaskConical className="w-2.5 h-2.5 text-royal" />}
+                    </div>
+                  </div>
+
+                  {/* Bridge Titles */}
+                  <h4 className="text-xs font-semibold text-ink-primary leading-tight mb-1 truncate">
+                    {disc.conceptAName} <span className="text-tangerine font-bold">↔</span> {disc.conceptBName}
+                  </h4>
+
+                  {/* Concise summary */}
+                  <p className="text-[11px] text-ink-secondary line-clamp-2 leading-relaxed">
+                    {disc.explanation}
+                  </p>
+
+                  {/* Quick Action Toolbar on hover */}
+                  <div className="mt-2 pt-1.5 border-t border-ink/8 flex items-center justify-between text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         pinDiscovery(disc.id);
                       }}
-                      className={`p-0.5 rounded hover:text-discovery transition-colors ${
-                        disc.status === 'pinned' ? 'text-discovery' : 'text-text-muted opacity-0 group-hover:opacity-100'
-                      }`}
-                      title="Pin Discovery"
+                      className="text-ink-muted hover:text-tangerine flex items-center space-x-0.5"
                     >
-                      <Pin className="w-3 h-3" />
+                      <Pin className="w-2.5 h-2.5" />
+                      <span>{isPinned ? 'Unpin' : 'Pin'}</span>
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         dismissDiscovery(disc.id);
                       }}
-                      className="p-0.5 rounded text-text-muted hover:text-conflict opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Dismiss"
+                      className="text-ink-muted hover:text-ink-primary flex items-center space-x-0.5"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-2.5 h-2.5" />
+                      <span>Dismiss</span>
                     </button>
                   </div>
                 </div>
-
-                {/* Connected Bridge Names */}
-                <div className="text-xs font-semibold text-text-primary leading-tight mb-1">
-                  <span className="text-causal">{disc.conceptAName}</span>
-                  <span className="text-text-muted mx-1">↔</span>
-                  <span className="text-discovery-light">{disc.conceptBName}</span>
-                </div>
-
-                {/* Rationale Snippet */}
-                <p className="text-[11px] text-text-secondary leading-snug line-clamp-2">
-                  {disc.explanation}
-                </p>
-
-                {/* Quick Lab Promotion CTA */}
-                <div className="mt-2.5 pt-2 border-t border-border flex items-center justify-between">
-                  <span className="text-[10px] text-text-muted font-mono">
-                    {disc.conceptADomain} • {disc.conceptBDomain}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      promoteDiscoveryToLab(disc.id);
-                    }}
-                    className="flex items-center space-x-1 text-[11px] font-medium text-discovery hover:text-discovery-light transition-colors"
-                  >
-                    <span>Investigate</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-
-        {/* Active Investigations Section */}
-        {investigations.length > 0 && (
-          <div className="pt-3 mt-3 border-t border-border">
-            <div className="flex items-center justify-between mb-2 px-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted font-semibold">
-                Active Investigations ({investigations.length})
-              </span>
-            </div>
-            <div className="space-y-1.5">
-              {investigations.map((inv) => (
-                <div
-                  key={inv.id}
-                  onClick={() => setActiveInvestigation(inv.id)}
-                  className="p-2 rounded bg-cosmic-950 border border-border hover:border-discovery/40 cursor-pointer transition-all flex items-center justify-between"
-                >
-                  <div className="truncate pr-2">
-                    <p className="text-xs font-medium text-text-primary truncate">{inv.title}</p>
-                    <p className="text-[10px] text-text-muted font-mono capitalize">
-                      Stage: {inv.stage}
-                    </p>
-                  </div>
-                  <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
-                    inv.stage === 'completed'
-                      ? 'bg-verified/15 text-verified border-verified/30'
-                      : 'bg-discovery/15 text-discovery-light border-discovery/30 animate-pulse'
-                  }`}>
-                    {inv.stage === 'completed' ? 'Done' : 'Active'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Domain Filters & Knowledge Metrics */}
-      <div className="p-3 border-t border-border bg-cosmic-950/80">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-text-muted flex items-center space-x-1 font-semibold">
-            <Filter className="w-3 h-3" />
-            <span>Domains</span>
-          </span>
-          {selectedDomainFilter && (
-            <button
-              onClick={() => setSelectedDomainFilter(null)}
-              className="text-[10px] text-discovery hover:underline"
-            >
-              Reset
-            </button>
+              );
+            })
           )}
         </div>
+      )}
 
-        {/* Domain Filter Pills */}
-        <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-1">
+      {/* Tab 2: Domain Taxonomy */}
+      {activeTab === 'domains' && (
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5">
           <button
             onClick={() => setSelectedDomainFilter(null)}
-            className={`text-[10px] px-2 py-0.5 rounded-full transition-all border ${
+            className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs flex items-center justify-between transition-colors ${
               selectedDomainFilter === null
-                ? 'bg-discovery/20 text-discovery-light border-discovery/40 font-semibold'
-                : 'bg-cosmic-800 text-text-muted border-border hover:text-text-secondary'
+                ? 'bg-royal text-white font-medium shadow-xs'
+                : 'text-ink-secondary hover:bg-cream-100 hover:text-ink-primary'
             }`}
           >
-            All ({concepts.length})
+            <span>All Domains</span>
+            <span className="font-mono text-[10px] opacity-75">{concepts.length}</span>
           </button>
-          {domains.map((dom) => {
-            const count = concepts.filter((c) => c.domainCategory === dom).length;
-            const isSelected = selectedDomainFilter === dom;
+
+          {domains.map((domain) => {
+            const count = concepts.filter((c) => c.domainCategory === domain).length;
+            const isSelected = selectedDomainFilter === domain;
+
             return (
               <button
-                key={dom}
-                onClick={() => setSelectedDomainFilter(isSelected ? null : dom)}
-                className={`text-[10px] px-2 py-0.5 rounded-full transition-all border ${
+                key={domain}
+                onClick={() => setSelectedDomainFilter(domain)}
+                className={`w-full text-left px-2.5 py-1.5 rounded-md text-xs flex items-center justify-between transition-colors ${
                   isSelected
-                    ? 'bg-discovery/20 text-discovery-light border-discovery/40 font-semibold'
-                    : 'bg-cosmic-800 text-text-muted border-border hover:text-text-secondary'
+                    ? 'bg-royal text-white font-medium shadow-xs'
+                    : 'text-ink-secondary hover:bg-cream-100 hover:text-ink-primary'
                 }`}
               >
-                {dom} ({count})
+                <span className="truncate">{domain}</span>
+                <span className="font-mono text-[10px] opacity-75">{count}</span>
               </button>
             );
           })}
         </div>
+      )}
 
-        {/* Epistemic Status Metrics Bar */}
-        <div className="mt-3 pt-2.5 border-t border-border/60 flex items-center justify-between text-[10px] font-mono text-text-muted">
-          <span className="flex items-center space-x-1" title="Accepted Relationships">
-            <CheckCircle2 className="w-3 h-3 text-verified" />
-            <span>{acceptedCount}</span>
+      {/* Graph Density Footer */}
+      <div className="p-2.5 border-t border-ink/10 bg-cream-100 text-[10px] space-y-1">
+        <div className="flex items-center justify-between text-ink-muted font-mono">
+          <span>Graph Density</span>
+          <span className="font-semibold text-royal">
+            {(relationships.length / (concepts.length || 1)).toFixed(2)} edges/node
           </span>
-          <span className="flex items-center space-x-1" title="Proposed by AI">
-            <HelpCircle className="w-3 h-3 text-discovery-light" />
-            <span>{proposedCount}</span>
-          </span>
-          <span className="flex items-center space-x-1" title="Disputed or Conflicted">
-            <AlertCircle className="w-3 h-3 text-conflict" />
-            <span>{disputedCount}</span>
-          </span>
+        </div>
+        <div className="w-full bg-cream-300 rounded-full h-1 overflow-hidden">
+          <div 
+            className="bg-royal h-full rounded-full transition-all duration-300"
+            style={{ width: `${Math.min(100, (relationships.length / (concepts.length || 1)) * 40)}%` }}
+          />
         </div>
       </div>
     </aside>

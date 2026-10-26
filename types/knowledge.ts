@@ -1,3 +1,5 @@
+import { SafetyDecision, SafetyCategory } from '@/types/safety';
+
 export type RelationshipType = 
   | 'causes' 
   | 'contradicts' 
@@ -49,9 +51,30 @@ export type InvestigationOutcome =
   | 'inconclusive'
   | 'not_completed';
 
+export interface UserAccount {
+  id: string;
+  email: string;
+  fullName: string;
+  avatarUrl?: string;
+  role: 'researcher' | 'admin' | 'guest';
+  createdAt: string;
+}
+
+export interface Workspace {
+  id: string;
+  userId: string;
+  name: string;
+  description: string;
+  domainFocus: string[];
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Source {
   id: string;
   userId: string;
+  workspaceId?: string;
   title: string;
   sourceType: 'text' | 'markdown' | 'pdf' | 'url';
   content: string;
@@ -63,18 +86,22 @@ export interface Source {
 export interface Concept {
   id: string;
   userId: string;
+  workspaceId?: string;
   canonicalName: string;
   aliases: string[];
   description: string;
   domainCategory: string;
   color?: string;
+  tags?: string[];
   embedding?: number[];
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface Relationship {
   id: string;
   userId: string;
+  workspaceId?: string;
   sourceConceptId: string;
   targetConceptId: string;
   relationshipType: RelationshipType;
@@ -83,6 +110,7 @@ export interface Relationship {
   status: RelationshipStatus;
   rationale: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface EvidenceRecord {
@@ -112,6 +140,7 @@ export interface StructuredExplanation {
 export interface DiscoveryCandidate {
   id: string;
   userId: string;
+  workspaceId?: string;
   dedupKey?: string;
   conceptAId: string;
   conceptBId: string;
@@ -128,7 +157,11 @@ export interface DiscoveryCandidate {
   uncertainty?: string;
   investigationAngle?: string;
   structuredExplanation?: StructuredExplanation;
-  safetyDecision?: 'ALLOW' | 'ALLOW_WITH_LIMITS' | 'CLARIFY' | 'REFUSE_AND_REDIRECT' | 'BLOCK_SPECIFIC_OPERATION';
+  safetyDecision?: SafetyDecision;
+  safetyCategory?: SafetyCategory;
+  safetyRationale?: string;
+  permittedScope?: string;
+  safeAlternative?: string;
   noveltyScore: number;
   plausibilityScore: number;
   compositeScore: number;
@@ -180,6 +213,7 @@ export interface ExperimentPlan {
 export interface Investigation {
   id: string;
   userId: string;
+  workspaceId?: string;
   discoveryId?: string;
   title: string;
   summary: string;
@@ -197,6 +231,7 @@ export interface Investigation {
 export interface KnowledgeRevision {
   id: string;
   userId: string;
+  workspaceId?: string;
   entityType: 'concept' | 'relationship' | 'hypothesis';
   entityId: string;
   previousState: any;

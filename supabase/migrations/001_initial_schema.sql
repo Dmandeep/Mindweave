@@ -1,4 +1,4 @@
--- Web of Thoughts: Initial Database Schema Migration
+-- MindWeave: Initial Database Schema Migration
 -- Compatible with Supabase PostgreSQL 16 + pgvector
 
 -- Enable UUID extension and pgvector
@@ -6,11 +6,28 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS vector;
 
 --------------------------------------------------------------------------------
+-- 0. WORKSPACES & USER CONTEXT
+--------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.workspaces (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    domain_focus TEXT[] DEFAULT ARRAY[]::TEXT[],
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+);
+
+CREATE INDEX IF NOT EXISTS idx_workspaces_user ON public.workspaces(user_id);
+
+--------------------------------------------------------------------------------
 -- 1. RAW INGESTION & DOCUMENT PROVENANCE
 --------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.sources (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
+    workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     source_type TEXT NOT NULL CHECK (source_type IN ('text', 'markdown', 'pdf', 'url')),
     raw_content TEXT NOT NULL,
@@ -20,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.sources (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
-CREATE INDEX IF NOT EXISTS idx_sources_user_created ON public.sources(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_sources_user_workspace ON public.sources(user_id, workspace_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sources_hash ON public.sources(user_id, content_hash);
 
 CREATE TABLE IF NOT EXISTS public.source_chunks (
@@ -43,6 +60,7 @@ CREATE INDEX IF NOT EXISTS idx_chunks_embedding ON public.source_chunks USING hn
 CREATE TABLE IF NOT EXISTS public.concepts (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
+    workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE,
     canonical_name TEXT NOT NULL,
     aliases TEXT[] DEFAULT ARRAY[]::TEXT[],
     description TEXT,
@@ -51,15 +69,16 @@ CREATE TABLE IF NOT EXISTS public.concepts (
     color TEXT DEFAULT '#8B5CF6',
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
-    CONSTRAINT uq_user_concept UNIQUE (user_id, canonical_name)
+    CONSTRAINT uq_workspace_concept UNIQUE (workspace_id, canonical_name)
 );
 
-CREATE INDEX IF NOT EXISTS idx_concepts_user_domain ON public.concepts(user_id, domain_category);
+CREATE INDEX IF NOT EXISTS idx_concepts_user_domain ON public.concepts(user_id, workspace_id, domain_category);
 CREATE INDEX IF NOT EXISTS idx_concepts_embedding ON public.concepts USING hnsw (embedding vector_cosine_ops);
 
 CREATE TABLE IF NOT EXISTS public.relationships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
+    workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE,
     source_concept_id UUID NOT NULL REFERENCES public.concepts(id) ON DELETE CASCADE,
     target_concept_id UUID NOT NULL REFERENCES public.concepts(id) ON DELETE CASCADE,
     relationship_type TEXT NOT NULL CHECK (relationship_type IN (
@@ -76,7 +95,7 @@ CREATE TABLE IF NOT EXISTS public.relationships (
     CONSTRAINT chk_no_self_edges CHECK (source_concept_id != target_concept_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_rel_user_concepts ON public.relationships(user_id, source_concept_id, target_concept_id);
+CREATE INDEX IF NOT EXISTS idx_rel_user_concepts ON public.relationships(user_id, workspace_id, source_concept_id, target_concept_id);
 CREATE INDEX IF NOT EXISTS idx_rel_status ON public.relationships(user_id, status);
 
 CREATE TABLE IF NOT EXISTS public.evidence_records (
@@ -97,6 +116,7 @@ CREATE INDEX IF NOT EXISTS idx_evidence_rel ON public.evidence_records(relations
 CREATE TABLE IF NOT EXISTS public.discovery_candidates (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
+    workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE,
     concept_a_id UUID NOT NULL REFERENCES public.concepts(id) ON DELETE CASCADE,
     concept_b_id UUID NOT NULL REFERENCES public.concepts(id) ON DELETE CASCADE,
     discovery_type TEXT NOT NULL CHECK (discovery_type IN (
@@ -113,11 +133,12 @@ CREATE TABLE IF NOT EXISTS public.discovery_candidates (
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
-CREATE INDEX IF NOT EXISTS idx_disc_user_composite ON public.discovery_candidates(user_id, status, composite_score DESC);
+CREATE INDEX IF NOT EXISTS idx_disc_user_composite ON public.discovery_candidates(user_id, workspace_id, status, composite_score DESC);
 
 CREATE TABLE IF NOT EXISTS public.investigations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
+    workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE,
     discovery_id UUID REFERENCES public.discovery_candidates(id) ON DELETE SET NULL,
     title TEXT NOT NULL,
     summary TEXT,
@@ -147,7 +168,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_plans (
     methodology TEXT NOT NULL,
     success_criteria JSONB NOT NULL DEFAULT '[]'::jsonb,
     observations TEXT,
-    outcome TEXT CHECK (outcome IN ('supported', 'refuted', 'inconclusive')),
+    outcome TEXT CHECK (outcome IN ('supported', 'partially_supported', 'refuted', 'inconclusive')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
     completed_at TIMESTAMPTZ
 );
@@ -155,6 +176,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_plans (
 CREATE TABLE IF NOT EXISTS public.knowledge_revisions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
+    workspace_id UUID REFERENCES public.workspaces(id) ON DELETE CASCADE,
     entity_type TEXT NOT NULL CHECK (entity_type IN ('concept', 'relationship', 'hypothesis')),
     entity_id UUID NOT NULL,
     previous_state JSONB NOT NULL,
@@ -172,10 +194,11 @@ CREATE TABLE IF NOT EXISTS public.safety_assessments (
     target_entity_type TEXT NOT NULL CHECK (target_entity_type IN ('source', 'concept', 'discovery', 'investigation', 'experiment')),
     target_entity_id UUID NOT NULL,
     policy_version TEXT NOT NULL DEFAULT 'v1.0',
-    decision TEXT NOT NULL CHECK (decision IN ('ALLOW', 'ALLOW_WITH_LIMITS', 'CLARIFY', 'REFUSE_AND_REDIRECT', 'BLOCK_SPECIFIC_OPERATION')),
+    decision TEXT NOT NULL CHECK (decision IN ('ALLOW', 'RESTRICT', 'REVIEW_REQUIRED', 'REFUSE_AND_REDIRECT', 'BLOCK_SPECIFIC_OPERATION')),
     category TEXT NOT NULL CHECK (category IN ('benign', 'cybersecurity_defensive', 'cybersecurity_offensive', 'cbrn', 'harmful_action', 'dual_use_research', 'ambiguous')),
     rationale_summary TEXT NOT NULL,
     permitted_scope TEXT,
+    safe_alternative TEXT,
     assessment_method TEXT NOT NULL CHECK (assessment_method IN ('deterministic_rule', 'llm_classifier', 'fallback_default')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
@@ -183,6 +206,7 @@ CREATE TABLE IF NOT EXISTS public.safety_assessments (
 --------------------------------------------------------------------------------
 -- 5. ROW LEVEL SECURITY (RLS) POLICIES
 --------------------------------------------------------------------------------
+ALTER TABLE public.workspaces ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.source_chunks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.concepts ENABLE ROW LEVEL SECURITY;
@@ -194,3 +218,25 @@ ALTER TABLE public.hypotheses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.experiment_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.knowledge_revisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.safety_assessments ENABLE ROW LEVEL SECURITY;
+
+-- Workspace Isolation Policies
+CREATE POLICY "Users access own workspaces" ON public.workspaces
+    FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users access own concepts" ON public.concepts
+    FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users access own relationships" ON public.relationships
+    FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users access own discoveries" ON public.discovery_candidates
+    FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users access own investigations" ON public.investigations
+    FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users access own revisions" ON public.knowledge_revisions
+    FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users access own safety assessments" ON public.safety_assessments
+    FOR ALL USING (auth.uid() = user_id);

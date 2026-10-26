@@ -14,17 +14,17 @@ export default function Home() {
   const { viewMode } = useKnowledgeStore();
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-cosmic-950">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-surface-base">
       {/* Top Application Header */}
       <Header />
 
-      {/* Main 3-Column Studio Workspace */}
+      {/* Main Studio Workspace */}
       <div className="flex flex-1 overflow-hidden relative min-h-0">
-        {/* Left Column: Nav Sidebar & Discovery Feed */}
+        {/* Left Column: Nav Sidebar */}
         <NavSidebar />
 
-        {/* Center Area: Knowledge Universe, Discoveries Feed, or Discovery Lab */}
-        <main className="flex-1 relative overflow-hidden flex flex-col h-full min-h-0 w-full bg-cosmic-950">
+        {/* Center Canvas / Workspaces */}
+        <main className="flex-1 relative overflow-hidden flex flex-col h-full min-h-0 w-full bg-surface-base">
           {viewMode === 'universe' && <KnowledgeCanvas />}
           {viewMode === 'discoveries' && <DiscoveriesWorkspace />}
           {viewMode === 'lab' && <DiscoveryLabWorkbench />}
@@ -34,7 +34,7 @@ export default function Home() {
         <InspectorPanel />
       </div>
 
-      {/* Quick Capture Modal Dialog */}
+      {/* Fast Capture Modal Dialog */}
       <CaptureModal />
     </div>
   );

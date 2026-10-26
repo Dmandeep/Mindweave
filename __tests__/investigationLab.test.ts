@@ -25,6 +25,7 @@ describe('Phase 3: Discovery Lab Workflow & Epistemic Reconciliation', () => {
           plausibilityScore: 0.90,
           compositeScore: 0.88,
           status: 'unread',
+          safetyDecision: 'ALLOW',
           createdAt: new Date().toISOString(),
         },
       ],

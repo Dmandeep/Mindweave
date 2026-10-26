@@ -178,9 +178,9 @@ export class AutonomousDiscoveryEngine {
         'discover'
       );
 
-      if (safetyCheck.decision === 'BLOCK_SPECIFIC_OPERATION') {
+      if (safetyCheck.decision === 'BLOCK_SPECIFIC_OPERATION' || safetyCheck.decision === 'REFUSE_AND_REDIRECT') {
         blockedCount++;
-        continue; // Exclude high-risk catastrophic proposals
+        continue; // Exclude high-risk catastrophic proposals and harmful operational requests
       }
 
       const existing = existingCandidateMap.get(dedupKey);
@@ -202,6 +202,10 @@ export class AutonomousDiscoveryEngine {
           investigationAngle: structuredExp.investigationAngle,
           structuredExplanation: structuredExp,
           safetyDecision: safetyCheck.decision,
+          safetyCategory: safetyCheck.category,
+          safetyRationale: safetyCheck.rationaleSummary,
+          permittedScope: safetyCheck.permittedScope,
+          safeAlternative: safetyCheck.safeAlternative,
           updatedAt: now,
         });
       } else {
@@ -227,6 +231,10 @@ export class AutonomousDiscoveryEngine {
           investigationAngle: structuredExp.investigationAngle,
           structuredExplanation: structuredExp,
           safetyDecision: safetyCheck.decision,
+          safetyCategory: safetyCheck.category,
+          safetyRationale: safetyCheck.rationaleSummary,
+          permittedScope: safetyCheck.permittedScope,
+          safeAlternative: safetyCheck.safeAlternative,
           noveltyScore: Math.min(1, Math.max(0, noveltyScore)),
           plausibilityScore: Math.min(1, Math.max(0, plausibilityScore)),
           compositeScore: Math.min(1, Math.max(0, compositeScore)),

@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   XCircle,
   HelpCircle,
-  ArrowRight,
   ShieldCheck,
   Plus,
   Trash2,
@@ -18,19 +17,19 @@ import {
   AlertTriangle,
   Lightbulb,
   Compass,
-  Link as LinkIcon,
   Quote,
   ShieldAlert,
+  ArrowRight
 } from 'lucide-react';
 import { InvestigationStage, InvestigationOutcome, EvidenceRecord } from '@/types/knowledge';
 import { evaluateSafetyPolicy } from '@/lib/safety/safetyClassifier';
 
 const STAGES: { key: InvestigationStage; label: string; step: number }[] = [
-  { key: 'hypothesis', label: '1. Hypothesis', step: 1 },
-  { key: 'design', label: '2. Experiment Design', step: 2 },
-  { key: 'execution', label: '3. Execution & Logs', step: 3 },
-  { key: 'evaluation', label: '4. Evaluation', step: 4 },
-  { key: 'completed', label: '5. Outcome', step: 5 },
+  { key: 'hypothesis', label: 'Hypothesis', step: 1 },
+  { key: 'design', label: 'Protocol', step: 2 },
+  { key: 'execution', label: 'Telemetry', step: 3 },
+  { key: 'evaluation', label: 'Evidence', step: 4 },
+  { key: 'completed', label: 'Conclusion', step: 5 },
 ];
 
 export const DiscoveryLabWorkbench: React.FC = () => {
@@ -42,14 +41,14 @@ export const DiscoveryLabWorkbench: React.FC = () => {
     updateExperimentPlan,
     recordObservation,
     reconcileInvestigationOutcome,
-    setActiveInvestigation,
     setViewMode,
+    selectRelationship,
+    relationships,
   } = useKnowledgeStore();
 
   const activeInvestigation = investigations.find((inv) => inv.id === activeInvestigationId);
   const linkedDiscovery = discoveryCandidates.find((d) => d.id === activeInvestigation?.discoveryId);
 
-  // Local state for editing fields
   const [researchQuestion, setResearchQuestion] = useState(
     activeInvestigation?.researchQuestion || ''
   );
@@ -60,7 +59,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
   const [newFalsification, setNewFalsification] = useState('');
   const [falsifications, setFalsifications] = useState<string[]>(
     activeInvestigation?.structuredHypothesis?.falsificationConditions || [
-      'If asynchronous consensus fails under bounded clock skew despite lease expiration.',
+      'If state consistency is violated under clock drift despite lease expiration.',
     ]
   );
   const [methodologyText, setMethodologyText] = useState(
@@ -82,7 +81,6 @@ export const DiscoveryLabWorkbench: React.FC = () => {
     rationale: string;
   }>({ decision: 'ALLOW', rationale: 'Verified safe empirical procedure.' });
 
-  // Sync local fields when active investigation changes
   useEffect(() => {
     if (activeInvestigation) {
       setResearchQuestion(
@@ -99,7 +97,6 @@ export const DiscoveryLabWorkbench: React.FC = () => {
       setEvidenceList(activeInvestigation.experimentPlan.evidenceRecords || []);
       setIsSaved(false);
 
-      // Run safety check on methodology
       evaluateSafetyPolicy(activeInvestigation.experimentPlan.methodology, 'experiment', 'generate_plan').then((res) => {
         setSafetyCheckResult({
           decision: res.decision,
@@ -107,83 +104,66 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         });
       });
     }
-  }, [activeInvestigationId, activeInvestigation, linkedDiscovery]);
+  }, [activeInvestigation, linkedDiscovery]);
 
   if (!activeInvestigation) {
     return (
-      <div className="h-full flex flex-col items-center justify-center p-8 text-center bg-cosmic-950">
-        <div className="w-16 h-16 rounded-2xl bg-discovery/10 border border-discovery/20 flex items-center justify-center text-discovery mb-4 shadow-xl">
-          <FlaskConical className="w-8 h-8" />
+      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-cream text-center h-full select-none animate-fade-in-up">
+        <div className="w-12 h-12 rounded-xl bg-white border border-ink/10 flex items-center justify-center text-royal mb-4 shadow-xs">
+          <FlaskConical className="w-6 h-6" />
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-2">No Active Investigation</h3>
-        <p className="text-xs text-text-muted max-w-md mb-6 leading-relaxed">
-          Select an ongoing investigation from the left sidebar, or promote a candidate from the Discoveries Workspace to start an empirical test protocol.
+        <h2 className="text-sm font-semibold text-ink-primary mb-1">Discovery Lab is Idle</h2>
+        <p className="text-xs text-ink-muted max-w-sm mb-4 leading-relaxed">
+          Select or launch a discovery candidate from the Discoveries Workspace to formulate empirical hypotheses and run falsification protocols.
         </p>
-        <div className="flex gap-3">
-          <button
-            onClick={() => setViewMode('discoveries')}
-            className="px-4 py-2 rounded-lg bg-discovery hover:bg-discovery-dark text-white text-xs font-medium transition-colors"
-          >
-            Explore Discoveries Queue
-          </button>
-          <button
-            onClick={() => setViewMode('universe')}
-            className="px-4 py-2 rounded-lg bg-cosmic-800 hover:bg-cosmic-700 text-foreground text-xs font-medium border border-border transition-colors"
-          >
-            Open Knowledge Universe
-          </button>
-        </div>
+        <button
+          onClick={() => setViewMode('discoveries')}
+          className="px-3.5 py-1.5 rounded-md bg-royal hover:bg-royal-hover text-white text-xs font-medium shadow-xs transition-all active:scale-98"
+        >
+          Open Discovery Feed
+        </button>
       </div>
     );
   }
-
-  const currentStageIndex = STAGES.findIndex((s) => s.key === activeInvestigation.stage);
-
-  // Handlers
-  const handleSaveHypothesis = () => {
-    updateHypothesis(activeInvestigation.id, hypothesisText, activeInvestigation.assumptions);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
-  };
 
   const handleAddAssumption = () => {
     if (!newAssumption.trim()) return;
     const updated = [...activeInvestigation.assumptions, newAssumption.trim()];
     updateHypothesis(activeInvestigation.id, hypothesisText, updated);
     setNewAssumption('');
+    setIsSaved(true);
   };
 
-  const handleRemoveAssumption = (indexToRemove: number) => {
-    const updated = activeInvestigation.assumptions.filter((_, idx) => idx !== indexToRemove);
+  const handleRemoveAssumption = (idx: number) => {
+    const updated = activeInvestigation.assumptions.filter((_, i) => i !== idx);
     updateHypothesis(activeInvestigation.id, hypothesisText, updated);
+    setIsSaved(true);
   };
 
   const handleAddFalsification = () => {
     if (!newFalsification.trim()) return;
     setFalsifications([...falsifications, newFalsification.trim()]);
     setNewFalsification('');
+    setIsSaved(true);
   };
 
-  const handleSaveMethodology = () => {
+  const handleSaveProtocol = () => {
     updateExperimentPlan(
       activeInvestigation.id,
       activeInvestigation.experimentPlan.title,
       methodologyText,
       activeInvestigation.experimentPlan.successCriteria
     );
-    evaluateSafetyPolicy(methodologyText, 'experiment', 'generate_plan').then((res) => {
-      setSafetyCheckResult({
-        decision: res.decision,
-        rationale: res.rationaleSummary,
-      });
-    });
     setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
   };
 
   const handleAddObservation = () => {
     if (!newObservation.trim()) return;
-    recordObservation(activeInvestigation.id, newObservation.trim());
+    const timestamp = new Date().toLocaleTimeString();
+    const entry = `[${timestamp}] ${newObservation.trim()}`;
+    const current = activeInvestigation.experimentPlan.observations || '';
+    const updated = current ? `${current}\n${entry}` : entry;
+    recordObservation(activeInvestigation.id, updated);
     setNewObservation('');
   };
 
@@ -191,16 +171,18 @@ export const DiscoveryLabWorkbench: React.FC = () => {
     if (!newEvidenceQuote.trim()) return;
     const newRecord: EvidenceRecord = {
       id: `ev-${Date.now()}`,
-      userId: 'user-default',
-      sourceId: linkedDiscovery?.conceptAId || 'src-manual',
-      sourceTitle: newEvidenceSource.trim() || 'Empirical Lab Observation',
+      userId: activeInvestigation.userId || 'user-default',
+      sourceId: `src-${Date.now()}`,
+      relationshipId: '',
+      hypothesisId: activeInvestigation.id,
+      sourceTitle: newEvidenceSource.trim() || 'Laboratory Note',
       verbatimQuote: newEvidenceQuote.trim(),
       startChar: 0,
       endChar: newEvidenceQuote.trim().length,
       stance: newEvidenceStance,
       createdAt: new Date().toISOString(),
     };
-    const updated = [...evidenceList, newRecord];
+    const updated = [newRecord, ...evidenceList];
     setEvidenceList(updated);
     setNewEvidenceQuote('');
     setNewEvidenceSource('');
@@ -210,473 +192,424 @@ export const DiscoveryLabWorkbench: React.FC = () => {
     reconcileInvestigationOutcome(activeInvestigation.id, outcome);
   };
 
+  const handleNavigateToUniverse = () => {
+    if (linkedDiscovery) {
+      const rel = relationships.find(
+        (r) =>
+          (r.sourceConceptId === linkedDiscovery.conceptAId && r.targetConceptId === linkedDiscovery.conceptBId) ||
+          (r.sourceConceptId === linkedDiscovery.conceptBId && r.targetConceptId === linkedDiscovery.conceptAId)
+      );
+      if (rel) {
+        selectRelationship(rel.id);
+      }
+    }
+    setViewMode('universe');
+  };
+
+  const currentStageIndex = STAGES.findIndex((s) => s.key === activeInvestigation.stage);
+
   return (
-    <div className="h-full flex flex-col bg-cosmic-950 overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-cream overflow-hidden select-none animate-fade-in">
       {/* Workbench Header */}
-      <div className="p-6 border-b border-border bg-cosmic-900/50 backdrop-blur-md sticky top-0 z-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+      <div className="px-6 py-3.5 border-b border-ink/10 bg-white/95 backdrop-blur-sm shadow-2xs">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-discovery/15 text-discovery border border-discovery/30 font-mono">
-                <FlaskConical className="w-3 h-3" />
-                Discovery Lab • Phase 3 Investigation
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-royal-subtle text-royal font-semibold border border-royal/20">
+                Discovery Lab Bench
               </span>
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium font-mono border ${
-                  safetyCheckResult.decision === 'ALLOW'
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : 'bg-conflict/10 text-conflict border-conflict/30'
-                }`}
-              >
-                {safetyCheckResult.decision === 'ALLOW' ? (
-                  <ShieldCheck className="w-3 h-3" />
-                ) : (
-                  <ShieldAlert className="w-3 h-3" />
-                )}
-                Safety: {safetyCheckResult.decision}
+              <span className="text-ink-muted text-xs">•</span>
+              <span className="text-xs font-mono text-ink-muted">
+                {activeInvestigation.id}
               </span>
             </div>
-            <h1 className="text-xl font-bold text-foreground">{activeInvestigation.title}</h1>
-            <p className="text-xs text-text-muted mt-1 max-w-3xl leading-relaxed">
-              {activeInvestigation.summary}
-            </p>
+            <h1 className="text-sm md:text-base font-semibold text-ink-primary mt-1 tracking-tight">
+              {activeInvestigation.title}
+            </h1>
           </div>
 
-          {/* Quick Stage Indicator */}
-          <div className="flex items-center gap-1.5 bg-cosmic-950/80 p-1.5 rounded-lg border border-border">
-            {STAGES.map((s, idx) => {
-              const isPast = idx < currentStageIndex;
-              const isCurrent = idx === currentStageIndex;
-              return (
-                <div
-                  key={s.key}
-                  className={`
-                    px-2.5 py-1 rounded text-xs font-mono font-medium transition-colors
-                    ${
-                      isCurrent
-                        ? 'bg-discovery text-white shadow-sm'
-                        : isPast
-                        ? 'text-emerald-400 bg-emerald-500/10'
-                        : 'text-text-muted bg-transparent'
-                    }
-                  `}
-                >
-                  {s.label}
-                </div>
-              );
-            })}
+          <div className="flex items-center gap-2">
+            {safetyCheckResult.decision === 'RESTRICT' ? (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-tangerine-subtle border border-tangerine/30 text-tangerine text-xs font-medium">
+                <ShieldAlert className="w-3.5 h-3.5" />
+                <span>Boundary Constrained Investigation</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-royal-subtle border border-royal/20 text-royal text-xs font-medium">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Ethically Verified Safe Protocol</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Linked Discovery Reference Banner */}
-        {linkedDiscovery && (
-          <div className="p-3 rounded-lg bg-discovery/5 border border-discovery/20 flex items-start justify-between gap-3 text-xs text-text-secondary">
-            <div className="flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-discovery shrink-0 mt-0.5" />
-              <div>
-                <span className="font-semibold text-discovery-light">Origin Discovery:</span>{' '}
-                {linkedDiscovery.explanation}
-                <div className="mt-1 flex items-center gap-3 text-[11px] text-text-muted font-mono">
-                  <span>Domain A: {linkedDiscovery.conceptADomain}</span>
-                  <span>•</span>
-                  <span>Domain B: {linkedDiscovery.conceptBDomain}</span>
-                  <span>•</span>
-                  <span>Composite Score: {Math.round(linkedDiscovery.compositeScore * 100)}%</span>
-                </div>
-              </div>
-            </div>
+        {/* Progression Stepper */}
+        <div className="mt-3.5 pt-3 border-t border-ink/8 flex items-center justify-between max-w-2xl">
+          {STAGES.map((s, idx) => {
+            const isCompleted = idx < currentStageIndex || activeInvestigation.stage === 'completed';
+            const isCurrent = s.key === activeInvestigation.stage;
 
-            <button
-              onClick={() => setViewMode('universe')}
-              className="px-2.5 py-1 rounded bg-cosmic-800 hover:bg-cosmic-700 text-text-secondary hover:text-foreground text-[11px] font-mono border border-border shrink-0 flex items-center gap-1"
-            >
-              <Compass className="w-3 h-3 text-causal" />
-              <span>Locate in Graph</span>
-            </button>
-          </div>
-        )}
+            return (
+              <div key={s.key} className="flex items-center flex-1 last:flex-none">
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold transition-all ${
+                      isCompleted
+                        ? 'bg-royal text-white shadow-2xs'
+                        : isCurrent
+                        ? 'bg-tangerine text-white ring-2 ring-tangerine/30'
+                        : 'bg-cream-200 text-ink-muted'
+                    }`}
+                  >
+                    {isCompleted ? '✓' : s.step}
+                  </div>
+                  <span
+                    className={`text-xs font-medium transition-colors ${
+                      isCurrent
+                        ? 'text-ink-primary font-semibold'
+                        : isCompleted
+                        ? 'text-royal'
+                        : 'text-ink-muted'
+                    }`}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+                {idx < STAGES.length - 1 && (
+                  <div className="flex-1 mx-2.5 h-0.5 bg-cream-300 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        isCompleted ? 'bg-royal w-full' : 'bg-transparent w-0'
+                      }`}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Main Investigation Content Grid */}
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Hypothesis, Assumptions, and Falsification */}
-        <div className="space-y-6">
-          {/* Step 1: Research Question & Falsifiable Hypothesis Statement */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-discovery" />
-                <h3 className="text-sm font-semibold text-foreground">
-                  Falsifiable Hypothesis Formulation
-                </h3>
-              </div>
-              {isSaved && (
-                <span className="text-xs text-emerald-400 font-medium animate-pulse">
-                  ✓ Saved
-                </span>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <label className="block text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-1">
-                Core Research Question
-              </label>
-              <input
-                type="text"
-                value={researchQuestion}
-                onChange={(e) => setResearchQuestion(e.target.value)}
-                className="w-full rounded-lg bg-cosmic-950 border border-border px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-discovery/60 font-mono"
-                placeholder="e.g. Can localized biological decay invariants prevent computational split-brain states?"
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="block text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-1">
-                Formal Hypothesis Statement
-              </label>
-              <textarea
-                value={hypothesisText}
-                onChange={(e) => setHypothesisText(e.target.value)}
-                rows={4}
-                className="w-full rounded-lg bg-cosmic-950 border border-border px-3.5 py-2.5 text-xs text-foreground focus:outline-none focus:border-discovery/60 transition-colors font-mono leading-relaxed"
-                placeholder="If [Condition X], then [Measurable Consequence Y] because [Causal Invariant Z]..."
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <button
-                onClick={handleSaveHypothesis}
-                className="px-3.5 py-1.5 rounded-lg bg-discovery hover:bg-discovery-dark text-white text-xs font-medium transition-colors shadow-sm"
-              >
-                Update Hypothesis
-              </button>
-            </div>
-          </div>
-
-          {/* Hidden Assumptions Checklist */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center gap-2 mb-3">
-              <ClipboardList className="w-4 h-4 text-causal" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Foundational Axioms & Assumptions
+      {/* Main Investigation Columns */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 max-w-5xl mx-auto w-full">
+        {/* Stage 1: Scientific Question & Hypothesis */}
+        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-royal" />
+              <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
+                1. Scientific Question & Null Hypothesis
               </h3>
             </div>
-            <p className="text-xs text-text-muted mb-3">
-              Identify latent operational prerequisites that must hold true for this hypothesis to be valid.
-            </p>
-
-            <ul className="space-y-2 mb-4">
-              {activeInvestigation.assumptions.map((assumption, index) => (
-                <li
-                  key={index}
-                  className="flex items-start justify-between gap-3 p-2.5 rounded-lg bg-cosmic-950/70 border border-border text-xs text-text-secondary"
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="text-causal font-mono text-[11px] shrink-0 mt-0.5">
-                      #{index + 1}
-                    </span>
-                    <span className="leading-relaxed">{assumption}</span>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveAssumption(index)}
-                    className="text-text-muted hover:text-conflict transition-colors shrink-0 p-0.5"
-                    title="Remove assumption"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newAssumption}
-                onChange={(e) => setNewAssumption(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddAssumption()}
-                placeholder="Add another underlying assumption..."
-                className="flex-1 rounded-lg bg-cosmic-950 border border-border px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-causal"
-              />
-              <button
-                onClick={handleAddAssumption}
-                className="px-3 py-1.5 rounded-lg bg-cosmic-800 hover:bg-cosmic-700 text-foreground text-xs font-medium border border-border transition-colors flex items-center gap-1"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add
-              </button>
-            </div>
+            {isSaved && (
+              <span className="text-[10px] font-mono text-royal font-medium animate-fade-in">
+                Saved ✓
+              </span>
+            )}
           </div>
 
-          {/* Falsification Conditions */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-conflict" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Explicit Falsification Conditions
-              </h3>
-            </div>
-            <p className="text-xs text-text-muted mb-3">
-              Define the exact measurable criteria under which this hypothesis is empirically rejected.
-            </p>
+          <div>
+            <label className="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+              Governing Research Question
+            </label>
+            <input
+              type="text"
+              value={researchQuestion}
+              onChange={(e) => setResearchQuestion(e.target.value)}
+              className="w-full bg-cream-100 border border-ink/10 rounded-md px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal"
+            />
+          </div>
 
-            <ul className="space-y-2 mb-3">
-              {falsifications.map((cond, idx) => (
-                <li
-                  key={idx}
-                  className="flex items-start justify-between gap-2 p-2 rounded bg-conflict/5 border border-conflict/20 text-xs text-conflict-light"
-                >
-                  <span className="leading-relaxed font-mono text-[11px]">✕ {cond}</span>
+          <div>
+            <label className="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+              Mechanistic Hypothesis Statement
+            </label>
+            <textarea
+              rows={2}
+              value={hypothesisText}
+              onChange={(e) => setHypothesisText(e.target.value)}
+              onBlur={() => {
+                updateHypothesis(activeInvestigation.id, hypothesisText, activeInvestigation.assumptions);
+                setIsSaved(true);
+              }}
+              className="w-full bg-cream-100 border border-ink/10 rounded-md px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal leading-relaxed"
+            />
+          </div>
+
+          {/* Falsification Criteria */}
+          <div>
+            <label className="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+              Popperian Falsification Invariants
+            </label>
+            <div className="space-y-1.5 mb-2">
+              {falsifications.map((f, i) => (
+                <div key={i} className="flex items-center justify-between p-2 rounded bg-cream-100 border border-ink/8 text-xs text-ink-secondary">
+                  <span className="leading-relaxed">&bull; {f}</span>
                   <button
-                    onClick={() => setFalsifications(falsifications.filter((_, i) => i !== idx))}
-                    className="text-conflict/60 hover:text-conflict p-0.5"
+                    onClick={() => setFalsifications(falsifications.filter((_, idx) => idx !== i))}
+                    className="text-ink-muted hover:text-tangerine p-0.5"
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
-                </li>
+                </div>
               ))}
-            </ul>
-
+            </div>
             <div className="flex gap-2">
               <input
                 type="text"
+                placeholder="Add falsification condition (e.g. If jitter exceeds 50ms)..."
                 value={newFalsification}
                 onChange={(e) => setNewFalsification(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleAddFalsification()}
-                placeholder="Condition under which hypothesis is false..."
-                className="flex-1 rounded-lg bg-cosmic-950 border border-border px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-conflict"
+                className="flex-1 bg-cream-100 border border-ink/10 rounded px-2.5 py-1 text-xs text-ink-primary focus:outline-none focus:border-royal"
               />
               <button
                 onClick={handleAddFalsification}
-                className="px-3 py-1.5 rounded-lg bg-conflict/20 hover:bg-conflict/30 text-conflict-light text-xs font-medium border border-conflict/30 transition-colors flex items-center gap-1"
+                className="px-2.5 py-1 rounded bg-cream-200 hover:bg-cream-300 text-ink-primary text-xs font-medium border border-ink/10 transition-colors"
               >
-                <Plus className="w-3.5 h-3.5" />
-                Add
+                Add Invariant
               </button>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Experiment Design, Evidence Records, Observations & Outcome */}
-        <div className="space-y-6">
-          {/* Step 2: Experiment Plan & Success Criteria */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center gap-2 mb-3">
-              <FileText className="w-4 h-4 text-emerald-400" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Experiment Plan & Quantitative Criteria
+        {/* Stage 2: Empirical Benchmark Protocol */}
+        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="w-4 h-4 text-royal" />
+              <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
+                2. Empirical Benchmark Protocol
               </h3>
             </div>
-
-            <div className="mb-4">
-              <label className="block text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-                Experimental Protocol & Methodology
-              </label>
-              <textarea
-                value={methodologyText}
-                onChange={(e) => setMethodologyText(e.target.value)}
-                rows={3}
-                className="w-full rounded-lg bg-cosmic-950 border border-border px-3 py-2 text-xs text-foreground focus:outline-none focus:border-emerald-400 transition-colors font-mono"
-              />
-              <div className="mt-2 flex justify-end">
-                <button
-                  onClick={handleSaveMethodology}
-                  className="px-3 py-1 rounded bg-cosmic-800 hover:bg-cosmic-700 text-xs text-foreground transition-colors font-medium border border-border"
-                >
-                  Save Protocol
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-text-muted uppercase tracking-wider mb-2">
-                Quantitative Success Criteria
-              </label>
-              <div className="space-y-2">
-                {activeInvestigation.experimentPlan.successCriteria.map((criterion) => (
-                  <div
-                    key={criterion.id}
-                    className="flex items-center justify-between p-2.5 rounded-lg bg-cosmic-950/70 border border-border text-xs"
-                  >
-                    <span className="font-medium text-text-secondary">{criterion.metricName}</span>
-                    <span className="font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                      {criterion.operator} {criterion.targetThreshold}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <button
+              onClick={handleSaveProtocol}
+              className="text-[10px] px-2 py-0.5 rounded bg-royal text-white font-medium hover:bg-royal-hover shadow-2xs"
+            >
+              Update Protocol
+            </button>
           </div>
 
-          {/* Evidence Records Grounding */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center gap-2 mb-3">
-              <Quote className="w-4 h-4 text-discovery" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Empirical Evidence Records
-              </h3>
-            </div>
+          <div>
+            <label className="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+              Methodology & Simulation Setup
+            </label>
+            <textarea
+              rows={2}
+              value={methodologyText}
+              onChange={(e) => setMethodologyText(e.target.value)}
+              className="w-full bg-cream-100 border border-ink/10 rounded-md px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal leading-relaxed"
+            />
+          </div>
 
-            <div className="space-y-2 mb-3">
-              {evidenceList.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="p-3 rounded-lg bg-cosmic-950/80 border border-border text-xs space-y-1"
-                >
-                  <div className="flex items-center justify-between text-[11px] text-text-muted font-mono">
-                    <span className="font-semibold text-text-secondary">{ev.sourceTitle}</span>
-                    <span
-                      className={`px-1.5 py-0.2 rounded uppercase font-bold text-[9px] ${
-                        ev.stance === 'supports'
-                          ? 'text-emerald-400 bg-emerald-500/10'
-                          : ev.stance === 'refutes'
-                          ? 'text-conflict bg-conflict/10'
-                          : 'text-text-muted bg-cosmic-900'
-                      }`}
-                    >
-                      {ev.stance}
-                    </span>
-                  </div>
-                  <p className="text-text-secondary italic font-mono text-[11px]">
-                    &ldquo;{ev.verbatimQuote}&rdquo;
-                  </p>
+          {/* Quantitative Acceptance Criteria */}
+          <div>
+            <label className="text-[10px] font-mono text-ink-muted uppercase block mb-1">
+              Quantitative Acceptance Criteria
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {activeInvestigation.experimentPlan.successCriteria?.map((criterion, idx) => (
+                <div key={idx} className="p-2.5 rounded bg-cream-100 border border-ink/8 flex items-center justify-between text-xs">
+                  <span className="text-ink-secondary truncate pr-2">{criterion.metricName || (criterion as any).metric}</span>
+                  <span className="font-mono text-[10px] text-royal font-semibold shrink-0">
+                    {criterion.operator} {criterion.targetThreshold}
+                  </span>
                 </div>
               ))}
             </div>
+          </div>
+        </div>
 
-            <div className="space-y-2 p-3 rounded-lg bg-cosmic-950/40 border border-border">
-              <input
-                type="text"
-                placeholder="Source Citation / Paper Title / Benchmark Run..."
-                value={newEvidenceSource}
-                onChange={(e) => setNewEvidenceSource(e.target.value)}
-                className="w-full bg-cosmic-950 border border-border rounded px-3 py-1 text-xs text-foreground focus:outline-none focus:border-discovery"
-              />
-              <textarea
-                placeholder="Verbatim quote or measured telemetry excerpt..."
-                value={newEvidenceQuote}
-                onChange={(e) => setNewEvidenceQuote(e.target.value)}
-                rows={2}
-                className="w-full bg-cosmic-950 border border-border rounded px-3 py-1 text-xs text-foreground focus:outline-none focus:border-discovery font-mono"
-              />
-              <div className="flex items-center justify-between">
-                <select
-                  value={newEvidenceStance}
-                  onChange={(e) => setNewEvidenceStance(e.target.value as any)}
-                  className="bg-cosmic-950 border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none"
-                >
-                  <option value="supports">Stance: Supports</option>
-                  <option value="refutes">Stance: Refutes</option>
-                  <option value="neutral">Stance: Neutral</option>
-                </select>
-                <button
-                  onClick={handleAddEvidence}
-                  disabled={!newEvidenceQuote.trim()}
-                  className="px-3 py-1 rounded bg-discovery hover:bg-discovery-dark text-white text-xs font-medium disabled:opacity-40"
-                >
-                  Attach Evidence Record
-                </button>
-              </div>
-            </div>
+        {/* Stage 3: Telemetry & Observations */}
+        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+          <div className="flex items-center gap-2">
+            <Lightbulb className="w-4 h-4 text-tangerine" />
+            <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
+              3. Telemetry & Observations Log
+            </h3>
           </div>
 
-          {/* Observations Log */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center gap-2 mb-3">
-              <Lightbulb className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-semibold text-foreground">
-                Empirical Telemetry & Observations Log
+          {activeInvestigation.experimentPlan.observations ? (
+            <div className="p-3 rounded-md bg-cream-100 border border-ink/8 text-xs text-ink-secondary font-mono whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
+              {activeInvestigation.experimentPlan.observations}
+            </div>
+          ) : (
+            <div className="p-3 rounded-md bg-cream-100 border border-dashed border-ink/15 text-center text-xs text-ink-muted">
+              No observations recorded yet. Append empirical telemetry below.
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <textarea
+              value={newObservation}
+              onChange={(e) => setNewObservation(e.target.value)}
+              rows={2}
+              placeholder="Log quantitative observations or benchmark readings..."
+              className="w-full rounded-md bg-cream-100 border border-ink/10 px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
+            />
+            <div className="flex justify-end">
+              <button
+                onClick={handleAddObservation}
+                disabled={!newObservation.trim()}
+                className="px-3 py-1 rounded-md bg-tangerine hover:bg-tangerine-hover text-white text-xs font-medium shadow-2xs transition-colors disabled:opacity-40"
+              >
+                Append Telemetry
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 4: Verbatim Evidence Records */}
+        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+          <div className="flex items-center gap-2">
+            <Quote className="w-4 h-4 text-royal" />
+            <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
+              4. Empirical Evidence Grounding
+            </h3>
+          </div>
+
+          <div className="space-y-2">
+            {evidenceList.map((ev) => (
+              <div key={ev.id} className="p-2.5 rounded-md bg-cream-100 border border-ink/8 text-xs space-y-1">
+                <div className="flex items-center justify-between text-[10px] text-ink-muted font-mono">
+                  <span className="font-semibold text-ink-secondary truncate max-w-[200px]">{ev.sourceTitle}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded uppercase font-bold text-[9px] ${
+                      ev.stance === 'supports'
+                        ? 'text-royal bg-royal-subtle border border-royal/20'
+                        : ev.stance === 'refutes'
+                        ? 'text-tangerine bg-tangerine-subtle border border-tangerine/20'
+                        : 'text-ink-muted bg-cream-200'
+                    }`}
+                  >
+                    {ev.stance}
+                  </span>
+                </div>
+                <p className="text-ink-secondary italic font-mono text-[11px] leading-relaxed">
+                  &ldquo;{ev.verbatimQuote}&rdquo;
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-2 p-3 rounded-md bg-cream-100 border border-ink/8">
+            <input
+              type="text"
+              placeholder="Source Title / Paper Reference..."
+              value={newEvidenceSource}
+              onChange={(e) => setNewEvidenceSource(e.target.value)}
+              className="w-full bg-white border border-ink/10 rounded px-2.5 py-1 text-xs text-ink-primary focus:outline-none focus:border-royal"
+            />
+            <textarea
+              placeholder="Verbatim quote or measured excerpt..."
+              value={newEvidenceQuote}
+              onChange={(e) => setNewEvidenceQuote(e.target.value)}
+              rows={2}
+              className="w-full bg-white border border-ink/10 rounded px-2.5 py-1 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
+            />
+            <div className="flex items-center justify-between">
+              <select
+                value={newEvidenceStance}
+                onChange={(e) => setNewEvidenceStance(e.target.value as any)}
+                className="bg-white border border-ink/10 rounded px-2 py-1 text-xs text-ink-primary focus:outline-none"
+              >
+                <option value="supports">Stance: Supports</option>
+                <option value="refutes">Stance: Refutes</option>
+                <option value="neutral">Stance: Neutral</option>
+              </select>
+              <button
+                onClick={handleAddEvidence}
+                disabled={!newEvidenceQuote.trim()}
+                className="px-3 py-1 rounded bg-royal hover:bg-royal-hover text-white text-xs font-medium disabled:opacity-40 transition-colors shadow-2xs"
+              >
+                Attach Evidence Record
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage 5: Epistemic Outcome Reconciliation & Graph Connection */}
+        <div className="p-4 rounded-xl bg-white border border-ink/10 shadow-xs space-y-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-royal" />
+              <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
+                5. Epistemic Conclusion & Knowledge Graph Reconciliation
               </h3>
             </div>
-
-            {activeInvestigation.experimentPlan.observations ? (
-              <div className="p-3 rounded-lg bg-cosmic-950/90 border border-border text-xs text-text-secondary font-mono whitespace-pre-wrap leading-relaxed mb-4 max-h-48 overflow-y-auto">
-                {activeInvestigation.experimentPlan.observations}
-              </div>
-            ) : (
-              <div className="p-4 rounded-lg bg-cosmic-950/50 border border-dashed border-border text-center text-xs text-text-muted mb-4">
-                No observations recorded yet. Run benchmark iterations or telemetry queries and document measured data.
-              </div>
+            {activeInvestigation.experimentPlan.outcome && (
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
+                  activeInvestigation.experimentPlan.outcome === 'supported'
+                    ? 'bg-royal-subtle text-royal border border-royal/30'
+                    : activeInvestigation.experimentPlan.outcome === 'partially_supported'
+                    ? 'bg-tangerine-subtle text-tangerine border border-tangerine/30'
+                    : activeInvestigation.experimentPlan.outcome === 'refuted'
+                    ? 'bg-cream-200 text-ink-muted border border-ink/20'
+                    : 'bg-cream-200 text-ink-muted border border-ink/20'
+                }`}
+              >
+                {activeInvestigation.experimentPlan.outcome.replace(/_/g, ' ')}
+              </span>
             )}
-
-            <div className="space-y-2">
-              <textarea
-                value={newObservation}
-                onChange={(e) => setNewObservation(e.target.value)}
-                rows={2}
-                placeholder="Log quantitative telemetry, metrics, or observed anomalies..."
-                className="w-full rounded-lg bg-cosmic-950 border border-border px-3 py-2 text-xs text-foreground focus:outline-none focus:border-amber-400 font-mono"
-              />
-              <div className="flex justify-end">
-                <button
-                  onClick={handleAddObservation}
-                  disabled={!newObservation.trim()}
-                  className="px-3.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-medium transition-colors disabled:opacity-40"
-                >
-                  Append Telemetry Entry
-                </button>
-              </div>
-            </div>
           </div>
 
-          {/* Step 4 & 5: Outcome Reconciliation */}
-          <div className="p-5 rounded-xl bg-cosmic-900/60 border border-border shadow-md">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-semibold text-foreground">
-                  Epistemic Outcome Reconciliation
-                </h3>
-              </div>
-              {activeInvestigation.experimentPlan.outcome && (
-                <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-mono uppercase font-bold tracking-wider ${
-                    activeInvestigation.experimentPlan.outcome === 'supported'
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                      : activeInvestigation.experimentPlan.outcome === 'partially_supported'
-                      ? 'bg-causal/20 text-causal-light border border-causal/40'
-                      : activeInvestigation.experimentPlan.outcome === 'refuted'
-                      ? 'bg-conflict/20 text-conflict border border-conflict/40'
-                      : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
-                  }`}
-                >
-                  {activeInvestigation.experimentPlan.outcome.replace(/_/g, ' ')}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-text-muted mb-4 leading-relaxed">
-              Upon verifying empirical telemetry against success criteria, conclude the inquiry to promote the relationship to the persistent Knowledge Universe, or record the refutation in the audit history.
-            </p>
+          <p className="text-xs text-ink-muted leading-relaxed">
+            Reconcile the investigation to promote verified findings as accepted edges in the Knowledge Graph, or record falsification in the audit ledger.
+          </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+            <button
+              onClick={() => handleReconcile('supported')}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-royal hover:bg-royal-hover text-white text-xs font-medium shadow-xs transition-all active:scale-98"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Promote as Edge</span>
+            </button>
+            <button
+              onClick={() => handleReconcile('partially_supported')}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-tangerine hover:bg-tangerine-hover text-white text-xs font-medium shadow-xs transition-all active:scale-98"
+            >
+              <span>Partially Valid</span>
+            </button>
+            <button
+              onClick={() => handleReconcile('refuted')}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-cream-200 hover:bg-cream-300 text-ink-primary border border-ink/15 text-xs font-medium transition-all active:scale-98"
+            >
+              <XCircle className="w-3.5 h-3.5 text-tangerine" />
+              <span>Record Refuted</span>
+            </button>
+            <button
+              onClick={() => handleReconcile('inconclusive')}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-cream-100 hover:bg-cream-200 text-ink-muted border border-ink/10 text-xs font-medium transition-all active:scale-98"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>Inconclusive</span>
+            </button>
+          </div>
+
+          {/* Connected Findings Back to Knowledge Graph Banner */}
+          {activeInvestigation.stage === 'completed' && (
+            <div className="mt-4 p-3.5 rounded-lg bg-cream-100 border border-royal/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in-up">
+              <div>
+                <h4 className="text-xs font-semibold text-ink-primary flex items-center gap-1.5">
+                  <Compass className="w-3.5 h-3.5 text-royal" />
+                  <span>Findings Synchronized with Knowledge Universe</span>
+                </h4>
+                <p className="text-[11px] text-ink-muted mt-0.5">
+                  {activeInvestigation.experimentPlan.outcome === 'supported'
+                    ? 'A verified relationship edge has been permanently established between these concepts.'
+                    : 'The empirical refutation has been recorded in the knowledge audit revision trail.'}
+                </p>
+              </div>
               <button
-                onClick={() => handleReconcile('supported')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition-all hover:scale-[1.02]"
+                onClick={handleNavigateToUniverse}
+                className="px-3 py-1.5 rounded-md bg-royal hover:bg-royal-hover text-white text-xs font-medium flex items-center justify-center gap-1.5 shadow-xs shrink-0 transition-all active:scale-98"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Promote Edge</span>
-              </button>
-              <button
-                onClick={() => handleReconcile('partially_supported')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-causal/20 hover:bg-causal/30 text-causal-light border border-causal/40 text-xs font-semibold transition-all hover:scale-[1.02]"
-              >
-                <span>Partially Valid</span>
-              </button>
-              <button
-                onClick={() => handleReconcile('refuted')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-conflict/20 hover:bg-conflict/30 text-conflict border border-conflict/40 text-xs font-semibold transition-all hover:scale-[1.02]"
-              >
-                <XCircle className="w-3.5 h-3.5" />
-                <span>Record Refuted</span>
-              </button>
-              <button
-                onClick={() => handleReconcile('inconclusive')}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-cosmic-800 hover:bg-cosmic-700 text-text-secondary border border-border text-xs font-medium transition-all"
-              >
-                <HelpCircle className="w-3.5 h-3.5" />
-                <span>Inconclusive</span>
+                <span>Inspect in Graph</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

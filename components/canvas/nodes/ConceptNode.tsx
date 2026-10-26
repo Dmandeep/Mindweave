@@ -2,7 +2,6 @@
 
 import React, { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Layers, Network } from 'lucide-react';
 import { Concept } from '@/types/knowledge';
 
 export interface ConceptNodeData {
@@ -11,138 +10,66 @@ export interface ConceptNodeData {
   isSelected?: boolean;
 }
 
-const DOMAIN_ACCENTS: Record<string, { border: string; bg: string; text: string; badge: string }> = {
-  'Distributed Systems': {
-    border: 'border-cyan-500/40 hover:border-cyan-400',
-    bg: 'from-cyan-950/40 to-cosmic-900/90',
-    text: 'text-cyan-300',
-    badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-  },
-  'Evolutionary Biology': {
-    border: 'border-purple-500/40 hover:border-purple-400',
-    bg: 'from-purple-950/40 to-cosmic-900/90',
-    text: 'text-purple-300',
-    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  },
-  'Immunology': {
-    border: 'border-emerald-500/40 hover:border-emerald-400',
-    bg: 'from-emerald-950/40 to-cosmic-900/90',
-    text: 'text-emerald-300',
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  },
-  'Neurobiology': {
-    border: 'border-rose-500/40 hover:border-rose-400',
-    bg: 'from-rose-950/40 to-cosmic-900/90',
-    text: 'text-rose-300',
-    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-  },
-  'Energy & Materials': {
-    border: 'border-amber-500/40 hover:border-amber-400',
-    bg: 'from-amber-950/40 to-cosmic-900/90',
-    text: 'text-amber-300',
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  },
-  'Mechanical Engineering': {
-    border: 'border-blue-500/40 hover:border-blue-400',
-    bg: 'from-blue-950/40 to-cosmic-900/90',
-    text: 'text-blue-300',
-    badge: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  },
-  'Neuroscience': {
-    border: 'border-emerald-500/40 hover:border-emerald-400',
-    bg: 'from-emerald-950/40 to-cosmic-900/90',
-    text: 'text-emerald-300',
-    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-  },
-  'Materials Science': {
-    border: 'border-amber-500/40 hover:border-amber-400',
-    bg: 'from-amber-950/40 to-cosmic-900/90',
-    text: 'text-amber-300',
-    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  },
-  'Macroeconomics': {
-    border: 'border-rose-500/40 hover:border-rose-400',
-    bg: 'from-rose-950/40 to-cosmic-900/90',
-    text: 'text-rose-300',
-    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-  },
-  'Default': {
-    border: 'border-discovery-500/40 hover:border-discovery-400',
-    bg: 'from-discovery-950/40 to-cosmic-900/90',
-    text: 'text-discovery-300',
-    badge: 'bg-discovery-500/10 text-discovery-400 border-discovery-500/30',
-  },
-};
-
 export const ConceptNode = memo(({ data, selected }: { data: ConceptNodeData; selected?: boolean }) => {
   const { concept, connectionCount, isSelected: propSelected } = data;
   const isSelected = selected || propSelected;
-  const domainTheme = DOMAIN_ACCENTS[concept.domainCategory] || DOMAIN_ACCENTS['Default'];
 
   return (
     <div
       className={`
-        relative group rounded-xl p-3.5 w-64 text-left transition-all duration-200
-        bg-gradient-to-b ${domainTheme.bg}
-        backdrop-blur-md shadow-lg
-        border ${domainTheme.border}
-        ${isSelected ? 'ring-2 ring-discovery-400 ring-offset-2 ring-offset-cosmic-950 shadow-discovery-500/20' : 'hover:shadow-md'}
+        relative group rounded-lg p-3.5 w-60 text-left transition-all duration-200
+        bg-white border
+        ${
+          isSelected
+            ? 'border-royal ring-2 ring-royal/30 shadow-md shadow-royal/10 scale-[1.01]'
+            : 'border-ink/12 hover:border-ink/25 hover:shadow-sm'
+        }
       `}
     >
-      {/* 4 Directional Connection Handles */}
+      {/* 4 Handles for clean orthogonal and curved connections */}
       <Handle
         type="target"
         position={Position.Top}
-        className="!w-2 !h-2 !bg-cosmic-400 !border-cosmic-900 hover:!bg-discovery-400 transition-colors"
+        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!w-2 !h-2 !bg-cosmic-400 !border-cosmic-900 hover:!bg-discovery-400 transition-colors"
+        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
       />
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-2 !h-2 !bg-cosmic-400 !border-cosmic-900 hover:!bg-discovery-400 transition-colors"
+        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="!w-2 !h-2 !bg-cosmic-400 !border-cosmic-900 hover:!bg-discovery-400 transition-colors"
+        className="!w-1.5 !h-1.5 !bg-ink/30 !border-white hover:!bg-royal transition-colors"
       />
 
-      {/* Domain Badge & Connection Counter */}
-      <div className="flex items-center justify-between mb-2">
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium border ${domainTheme.badge}`}
-        >
-          {concept.domainCategory}
-        </span>
-        <span className="flex items-center gap-1 text-[11px] text-cosmic-400 font-mono">
-          <Network className="w-3 h-3 text-cosmic-500" />
-          {connectionCount}
+      {/* Domain Chip & Connection Count */}
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center space-x-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-royal shrink-0" />
+          <span className="text-[10px] font-mono tracking-wide uppercase text-ink-muted truncate max-w-[130px]">
+            {concept.domainCategory}
+          </span>
+        </div>
+        <span className="text-[9px] font-mono text-ink-muted px-1.5 py-0.5 rounded bg-cream-200 border border-ink/10">
+          {connectionCount} {connectionCount === 1 ? 'edge' : 'edges'}
         </span>
       </div>
 
-      {/* Canonical Name */}
-      <h4 className="text-sm font-semibold text-cosmic-100 group-hover:text-white leading-tight mb-1.5 transition-colors line-clamp-2">
+      {/* Concept Canonical Title */}
+      <h4 className="text-xs font-semibold text-ink-primary tracking-tight leading-snug truncate">
         {concept.canonicalName}
       </h4>
 
-      {/* Description */}
-      <p className="text-xs text-cosmic-400 line-clamp-2 leading-relaxed">
+      {/* Concise Description */}
+      <p className="text-[11px] text-ink-secondary mt-1 line-clamp-2 leading-relaxed">
         {concept.description}
       </p>
-
-      {/* Aliases pill (if any) */}
-      {concept.aliases && concept.aliases.length > 0 && (
-        <div className="mt-2.5 pt-2 border-t border-cosmic-800/60 flex items-center gap-1 text-[10px] text-cosmic-400">
-          <Layers className="w-3 h-3 text-cosmic-500 shrink-0" />
-          <span className="truncate italic">
-            aka: {concept.aliases.join(', ')}
-          </span>
-        </div>
-      )}
     </div>
   );
 });
