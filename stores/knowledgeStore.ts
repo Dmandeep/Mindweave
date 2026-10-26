@@ -292,10 +292,20 @@ export const useKnowledgeStore = create<KnowledgeState>()(
       createdAt: new Date().toISOString()
     };
 
-    // Heuristic entity extraction for immediate responsiveness
-    const words = content.split(/\s+/);
-    const domainMatch = content.match(/biology|computing|distributed|materials|energy|chemistry|physics/i);
-    const detectedDomain = domainMatch ? domainMatch[0].toUpperCase() : 'General';
+    // Intelligent domain classification matching system taxonomy
+    const lowerContent = (title + ' ' + content).toLowerCase();
+    let detectedDomain = 'General';
+    if (lowerContent.includes('raft') || lowerContent.includes('consensus') || lowerContent.includes('distributed') || lowerContent.includes('quorum')) {
+      detectedDomain = 'Distributed Systems';
+    } else if (lowerContent.includes('honeybee') || lowerContent.includes('stigmerg') || lowerContent.includes('swarm') || lowerContent.includes('evolution')) {
+      detectedDomain = 'Evolutionary Biology';
+    } else if (lowerContent.includes('microglia') || lowerContent.includes('neuro') || lowerContent.includes('brain') || lowerContent.includes('synapse') || lowerContent.includes('parkinson')) {
+      detectedDomain = 'Neurobiology';
+    } else if (lowerContent.includes('battery') || lowerContent.includes('electrolyte') || lowerContent.includes('ceramic') || lowerContent.includes('lithium') || lowerContent.includes('anode')) {
+      detectedDomain = 'Energy & Materials';
+    } else if (lowerContent.includes('pressure') || lowerContent.includes('mechanical') || lowerContent.includes('clamping') || lowerContent.includes('compression')) {
+      detectedDomain = 'Mechanical Engineering';
+    }
     
     const conceptName = title.trim() || `Concept ${get().concepts.length + 1}`;
     const newConcept: Concept = {
@@ -310,15 +320,35 @@ export const useKnowledgeStore = create<KnowledgeState>()(
     };
 
     const updatedConcepts = [...get().concepts, newConcept];
+    let updatedRelationships = [...get().relationships];
+
+    // If there is an existing concept in the same domain, create an associated relationship
+    const sameDomainConcept = get().concepts.find(c => c.domainCategory === detectedDomain);
+    if (sameDomainConcept) {
+      updatedRelationships.push({
+        id: `rel-${Date.now()}`,
+        userId: 'user-default',
+        sourceConceptId: newConcept.id,
+        targetConceptId: sameDomainConcept.id,
+        relationshipType: 'associated_with',
+        directional: false,
+        confidenceScore: 0.72,
+        status: 'proposed',
+        rationale: `Both address ${detectedDomain} architectural models extracted from note "${title}".`,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     const newDiscoveries = AutonomousDiscoveryEngine.runDiscoveryScan(
       updatedConcepts,
-      get().relationships,
+      updatedRelationships,
       'user-default'
     );
 
     set((state) => ({
       sources: [newSource, ...state.sources],
       concepts: updatedConcepts,
+      relationships: updatedRelationships,
       discoveryCandidates: newDiscoveries.length > 0 ? newDiscoveries : state.discoveryCandidates,
       isCaptureModalOpen: false,
       selectedConceptId: newConcept.id

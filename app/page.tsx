@@ -13,17 +13,17 @@ export default function Home() {
   const { viewMode } = useKnowledgeStore();
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-cosmic-950 select-none">
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-cosmic-950">
       {/* Top Application Header */}
       <Header />
 
       {/* Main 3-Column Studio Workspace */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 overflow-hidden relative min-h-0">
         {/* Left Column: Nav Sidebar & Discovery Feed */}
         <NavSidebar />
 
         {/* Center Area: Interactive Knowledge Universe or Discovery Lab Workbench */}
-        <main className="flex-1 relative overflow-hidden flex flex-col bg-cosmic-950">
+        <main className="flex-1 relative overflow-hidden flex flex-col h-full min-h-0 w-full bg-cosmic-950">
           {viewMode === 'universe' ? (
             <KnowledgeCanvas />
           ) : (

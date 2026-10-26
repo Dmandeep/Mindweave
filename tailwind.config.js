@@ -22,6 +22,11 @@ module.exports = {
         ring: "#8B5CF6",
         background: "#080C14",
         foreground: "#F8FAFC",
+        text: {
+          primary: "#F8FAFC",
+          secondary: "#94A3B8",
+          muted: "#64748B",
+        },
         cosmic: {
           950: "#080C14",
           900: "#0D131F",

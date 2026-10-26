@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
@@ -10,8 +11,6 @@ import {
   useEdgesState,
   Node,
   Edge,
-  Connection,
-  addEdge,
   MarkerType,
   BackgroundVariant,
 } from '@xyflow/react';
@@ -28,15 +27,20 @@ const edgeTypes = {
   typedEdge: TypedEdge,
 };
 
-// Initial position coordinate offsets by domain category for intuitive semantic clustering
+// Initial position coordinate offsets by domain category for intuitive galactic clustering
 const DOMAIN_OFFSETS: Record<string, { x: number; y: number }> = {
-  'Distributed Systems': { x: -380, y: -200 },
-  'Neuroscience': { x: 380, y: -200 },
-  'Materials Science': { x: -380, y: 220 },
-  'Macroeconomics': { x: 380, y: 220 },
+  'Distributed Systems': { x: -480, y: -240 },
+  'Evolutionary Biology': { x: 240, y: -240 },
+  'Immunology': { x: -480, y: 240 },
+  'Neurobiology': { x: 240, y: 240 },
+  'Energy & Materials': { x: -120, y: -450 },
+  'Mechanical Engineering': { x: -120, y: 450 },
+  'Neuroscience': { x: 240, y: 240 },
+  'Materials Science': { x: -120, y: -450 },
+  'Macroeconomics': { x: 480, y: 0 },
 };
 
-export const KnowledgeCanvas: React.FC = () => {
+const CanvasInner: React.FC = () => {
   const {
     concepts,
     relationships,
@@ -49,24 +53,29 @@ export const KnowledgeCanvas: React.FC = () => {
     setSelectedDomainFilter,
   } = useKnowledgeStore();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Convert concepts & relationships to React Flow nodes and edges
   const initialNodes: Node[] = useMemo(() => {
     return concepts.map((concept, index) => {
-      // Calculate connection count for this concept
       const connectionCount = relationships.filter(
         (r) => r.sourceConceptId === concept.id || r.targetConceptId === concept.id
       ).length;
 
-      // Calculate initial layout position based on domain quadrant
-      const baseOffset = DOMAIN_OFFSETS[concept.domainCategory] || { x: 0, y: 0 };
-      const domainIndex = concepts
-        .filter((c) => c.domainCategory === concept.domainCategory)
-        .findIndex((c) => c.id === concept.id);
+      const baseOffset = DOMAIN_OFFSETS[concept.domainCategory] || {
+        x: Math.cos((index * 2 * Math.PI) / Math.max(concepts.length, 1)) * 360,
+        y: Math.sin((index * 2 * Math.PI) / Math.max(concepts.length, 1)) * 360,
+      };
 
-      const posX = baseOffset.x + (domainIndex % 2 === 0 ? 0 : 280);
-      const posY = baseOffset.y + Math.floor(domainIndex / 2) * 160;
+      const domainMatches = concepts.filter((c) => c.domainCategory === concept.domainCategory);
+      const domainIndex = domainMatches.findIndex((c) => c.id === concept.id);
 
-      // Filtering criteria
+      const posX = baseOffset.x + (domainIndex % 2 === 0 ? 0 : 260);
+      const posY = baseOffset.y + Math.floor(domainIndex / 2) * 150;
+
       const matchesSearch =
         !searchQuery ||
         concept.canonicalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -234,5 +243,13 @@ export const KnowledgeCanvas: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+export const KnowledgeCanvas: React.FC = () => {
+  return (
+    <ReactFlowProvider>
+      <CanvasInner />
+    </ReactFlowProvider>
   );
 };

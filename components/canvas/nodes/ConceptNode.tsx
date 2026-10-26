@@ -18,6 +18,36 @@ const DOMAIN_ACCENTS: Record<string, { border: string; bg: string; text: string;
     text: 'text-cyan-300',
     badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
   },
+  'Evolutionary Biology': {
+    border: 'border-purple-500/40 hover:border-purple-400',
+    bg: 'from-purple-950/40 to-cosmic-900/90',
+    text: 'text-purple-300',
+    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+  },
+  'Immunology': {
+    border: 'border-emerald-500/40 hover:border-emerald-400',
+    bg: 'from-emerald-950/40 to-cosmic-900/90',
+    text: 'text-emerald-300',
+    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  },
+  'Neurobiology': {
+    border: 'border-rose-500/40 hover:border-rose-400',
+    bg: 'from-rose-950/40 to-cosmic-900/90',
+    text: 'text-rose-300',
+    badge: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+  },
+  'Energy & Materials': {
+    border: 'border-amber-500/40 hover:border-amber-400',
+    bg: 'from-amber-950/40 to-cosmic-900/90',
+    text: 'text-amber-300',
+    badge: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+  },
+  'Mechanical Engineering': {
+    border: 'border-blue-500/40 hover:border-blue-400',
+    bg: 'from-blue-950/40 to-cosmic-900/90',
+    text: 'text-blue-300',
+    badge: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  },
   'Neuroscience': {
     border: 'border-emerald-500/40 hover:border-emerald-400',
     bg: 'from-emerald-950/40 to-cosmic-900/90',
