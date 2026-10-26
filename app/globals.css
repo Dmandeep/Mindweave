@@ -203,6 +203,12 @@ body {
   animation: nameLetterReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmerGlint 2.8s infinite;
+}
+
 /* Button & Card Focus / Press Utilities */
 button:focus-visible,
 input:focus-visible,
