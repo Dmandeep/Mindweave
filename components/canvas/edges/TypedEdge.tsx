@@ -37,26 +37,33 @@ export const TypedEdge = memo(({
   });
 
   const isProposed = relationship?.status === 'proposed';
-  const strokeWidth = isSelected ? 2.5 : 1.5;
+  const strokeWidth = isSelected ? 2.8 : isProposed ? 2 : 1.6;
 
   const strokeColor = isSelected 
     ? '#315FE9' 
     : isProposed 
     ? '#E97942' 
-    : 'rgba(37, 37, 37, 0.40)';
+    : 'rgba(37, 37, 37, 0.45)';
 
   const strokeStyle = {
     ...style,
     stroke: strokeColor,
     strokeWidth,
-    strokeDasharray: isProposed ? '5,5' : undefined,
+    strokeDasharray: isProposed || isSelected ? '6,6' : undefined,
     opacity: isSelected ? 1 : 0.85,
-    transition: 'stroke 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke-width 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+    filter: isSelected ? 'drop-shadow(0 0 5px rgba(49, 95, 233, 0.5))' : undefined,
+    transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
   };
 
   return (
     <>
-      <BaseEdge id={id} path={edgePath} style={strokeStyle} markerEnd={markerEnd} />
+      <BaseEdge 
+        id={id} 
+        path={edgePath} 
+        style={strokeStyle} 
+        markerEnd={markerEnd}
+        className={isSelected || isProposed ? 'animate-edge-flow' : undefined}
+      />
       <EdgeLabelRenderer>
         <div
           style={{
@@ -65,12 +72,14 @@ export const TypedEdge = memo(({
             pointerEvents: 'all',
           }}
           className={`
-            px-2 py-0.5 rounded text-[10px] font-mono tracking-tight select-none cursor-pointer transition-all duration-150
-            border backdrop-blur-xs
+            px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-tight select-none cursor-pointer transition-all duration-200
+            border shadow-xs backdrop-blur-xs
             ${
               isSelected
-                ? 'bg-[#F6F9FF] border-royal text-royal shadow-sm ring-1 ring-royal/30'
-                : 'bg-[#FCFAF5] border-ink/12 text-ink-muted hover:text-ink hover:border-ink/30 hover:shadow-xs'
+                ? 'bg-[#EFF6FF] border-royal text-royal shadow-sm ring-2 ring-royal/30 font-semibold scale-110'
+                : isProposed
+                ? 'bg-[#FFF7ED] border-tangerine text-tangerine shadow-xs ring-1 ring-tangerine/30 font-medium hover:scale-105'
+                : 'bg-[#FCFAF5] border-ink/15 text-ink-secondary hover:text-ink hover:border-ink/40 hover:shadow-sm hover:scale-105'
             }
           `}
         >
@@ -80,7 +89,7 @@ export const TypedEdge = memo(({
                 isSelected
                   ? 'bg-royal scale-125'
                   : isProposed
-                  ? 'bg-tangerine'
+                  ? 'bg-tangerine animate-ping'
                   : 'bg-ink/40'
               }`}
             />

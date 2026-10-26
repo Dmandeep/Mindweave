@@ -227,7 +227,11 @@ export const Header: React.FC<HeaderProps> = ({ onReplayIntro }) => {
         <button
           onClick={() => triggerDiscoveryScan()}
           disabled={isScanningDiscoveries}
-          className="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium text-ink-secondary hover:text-ink hover:bg-[#F3EDE0] border border-transparent hover:border-ink/10 transition-colors disabled:opacity-50"
+          className={`hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+            isScanningDiscoveries
+              ? 'bg-tangerine-subtle border border-tangerine/40 text-tangerine animate-pulse'
+              : 'text-ink-secondary hover:text-ink hover:bg-[#F3EDE0] border border-transparent hover:border-ink/10 active:scale-98'
+          } disabled:opacity-50`}
           title="Run discovery analysis scan across concepts"
         >
           {isScanningDiscoveries ? (
@@ -235,18 +239,18 @@ export const Header: React.FC<HeaderProps> = ({ onReplayIntro }) => {
           ) : (
             <Sparkles className="w-3.5 h-3.5 text-tangerine" />
           )}
-          <span className="hidden lg:inline">{isScanningDiscoveries ? 'Scanning...' : 'Scan'}</span>
+          <span className="hidden lg:inline">{isScanningDiscoveries ? 'Scanning Space...' : 'Scan'}</span>
         </button>
 
         {/* Replay Brand Intro Button */}
         {onReplayIntro && (
           <button
             onClick={onReplayIntro}
-            className="hidden xl:flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium text-ink-muted hover:text-ink hover:bg-[#F3EDE0] border border-transparent hover:border-ink/10 transition-colors"
+            className="hidden xl:flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium text-royal bg-royal-subtle hover:bg-royal/15 border border-royal/20 transition-all shadow-2xs active:scale-98"
             title="Replay Brand Introduction Animation"
             aria-label="Replay Brand Intro"
           >
-            <Play className="w-3 h-3 text-royal" />
+            <Play className="w-3 h-3 text-royal fill-royal/20" />
             <span>Intro</span>
           </button>
         )}

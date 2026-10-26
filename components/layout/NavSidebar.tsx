@@ -79,14 +79,22 @@ export const NavSidebar: React.FC = () => {
               const isPinned = disc.status === 'pinned';
               const isInLab = disc.status === 'investigating';
 
+              const queueBgMap: Record<string, string> = {
+                cross_domain_analogy: 'bg-[#F0F5FF] border-[#315FE9]/25 hover:border-[#315FE9]/60',
+                paradox_or_tension: 'bg-[#FFF7ED] border-[#E97942]/30 hover:border-[#E97942]/70',
+                structural_gap: 'bg-[#F5F3FF] border-[#7C3AED]/25 hover:border-[#7C3AED]/60',
+                emergent_synthesis: 'bg-[#F0FDF4] border-[#10B981]/25 hover:border-[#10B981]/60',
+              };
+              const queueBg = queueBgMap[disc.discoveryType] || 'bg-[#FAF7F0] border-ink/10 hover:border-ink/25';
+
               return (
                 <div
                   key={disc.id}
                   onClick={() => selectDiscovery(disc.id)}
                   className={`p-2.5 rounded-lg border transition-all duration-200 cursor-pointer relative group ${
                     isSelected
-                      ? 'bg-[#F6F9FF] border-royal shadow-sm ring-1 ring-royal/30 scale-[1.01]'
-                      : 'bg-[#FAF7F0] border-ink/10 hover:border-ink/25 hover:shadow-card hover:-translate-y-0.5'
+                      ? 'border-royal ring-2 ring-royal/35 shadow-md scale-[1.01] bg-[#EFF6FF]'
+                      : `${queueBg} hover:shadow-card hover:-translate-y-0.5`
                   }`}
                 >
                   {/* Top metadata */}

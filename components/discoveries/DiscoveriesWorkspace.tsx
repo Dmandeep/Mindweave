@@ -42,6 +42,33 @@ const TYPE_CONFIG: Record<DiscoveryType, { label: string; tagClass: string }> = 
   },
 };
 
+const DISCOVERY_CARD_THEMES: Record<string, { bg: string; border: string; borderHover: string; glow: string }> = {
+  cross_domain_analogy: {
+    bg: 'bg-[#F0F5FF]',
+    border: 'border-[#315FE9]/35',
+    borderHover: 'hover:border-[#315FE9]/80',
+    glow: 'hover:shadow-[0_8px_24px_rgba(49,95,233,0.18)]',
+  },
+  paradox_or_tension: {
+    bg: 'bg-[#FFF7ED]',
+    border: 'border-[#E97942]/40',
+    borderHover: 'hover:border-[#E97942]/80',
+    glow: 'hover:shadow-[0_8px_24px_rgba(233,121,66,0.18)]',
+  },
+  structural_gap: {
+    bg: 'bg-[#F5F3FF]',
+    border: 'border-[#7C3AED]/35',
+    borderHover: 'hover:border-[#7C3AED]/80',
+    glow: 'hover:shadow-[0_8px_24px_rgba(124,58,237,0.18)]',
+  },
+  emergent_synthesis: {
+    bg: 'bg-[#F0FDF4]',
+    border: 'border-[#10B981]/35',
+    borderHover: 'hover:border-[#10B981]/80',
+    glow: 'hover:shadow-[0_8px_24px_rgba(16,185,129,0.18)]',
+  },
+};
+
 export const DiscoveriesWorkspace: React.FC = () => {
   const {
     discoveryCandidates,
@@ -241,17 +268,19 @@ export const DiscoveriesWorkspace: React.FC = () => {
               const isSelected = selectedDiscoveryId === cand.id;
               const typeCfg = TYPE_CONFIG[cand.discoveryType] || TYPE_CONFIG.cross_domain_analogy;
 
+              const cardTheme = DISCOVERY_CARD_THEMES[cand.discoveryType] || DISCOVERY_CARD_THEMES.cross_domain_analogy;
+
               return (
                 <div
                   key={cand.id}
                   onClick={() => selectDiscovery(cand.id)}
                   style={{ animationDelay: `${index * 50}ms` }}
                   className={`
-                    rounded-xl p-4.5 transition-all duration-200 border cursor-pointer relative group flex flex-col justify-between bg-[#FCFAF5] animate-fade-in-up
+                    rounded-xl p-4.5 transition-all duration-200 border cursor-pointer relative group flex flex-col justify-between ${cardTheme.bg} animate-fade-in-up
                     ${
                       isSelected
-                        ? 'border-royal ring-2 ring-royal/25 shadow-selected scale-[1.008]'
-                        : 'border-ink/12 hover:border-ink/25 hover:shadow-card-hover hover:-translate-y-0.5'
+                        ? 'border-royal ring-2 ring-royal/35 shadow-[0_8px_28px_rgba(49,95,233,0.22)] scale-[1.01]'
+                        : `${cardTheme.border} ${cardTheme.borderHover} ${cardTheme.glow} shadow-sm hover:-translate-y-1`
                     }
                   `}
                 >

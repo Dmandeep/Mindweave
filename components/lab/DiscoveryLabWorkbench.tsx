@@ -293,7 +293,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
       {/* Main Investigation Columns */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4 max-w-5xl mx-auto w-full">
         {/* Stage 1: Scientific Question & Hypothesis */}
-        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up">
+        <div className="p-4 rounded-xl bg-[#F0F5FF] border border-[#315FE9]/30 shadow-[0_4px_16px_rgba(49,95,233,0.08)] space-y-3 animate-fade-in-up">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Target className="w-4 h-4 text-royal" />
@@ -373,7 +373,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 2: Empirical Benchmark Protocol */}
-        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
+        <div className="p-4 rounded-xl bg-[#F5F3FF] border border-[#7C3AED]/30 shadow-[0_4px_16px_rgba(124,58,237,0.08)] space-y-3 animate-fade-in-up" style={{ animationDelay: '50ms' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ClipboardList className="w-4 h-4 text-royal" />
@@ -420,7 +420,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 3: Telemetry & Observations */}
-        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+        <div className="p-4 rounded-xl bg-[#FFF7ED] border border-[#E97942]/35 shadow-[0_4px_16px_rgba(233,121,66,0.08)] space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
           <div className="flex items-center gap-2">
             <Lightbulb className="w-4 h-4 text-tangerine" />
             <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
@@ -429,11 +429,11 @@ export const DiscoveryLabWorkbench: React.FC = () => {
           </div>
 
           {activeInvestigation.experimentPlan.observations ? (
-            <div className="p-3 rounded-lg bg-[#FAF7F0] border border-ink/8 text-xs text-ink-secondary font-mono whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
+            <div className="p-3 rounded-lg bg-white/80 border border-ink/8 text-xs text-ink-secondary font-mono whitespace-pre-wrap leading-relaxed max-h-36 overflow-y-auto">
               {activeInvestigation.experimentPlan.observations}
             </div>
           ) : (
-            <div className="p-3 rounded-lg bg-[#FAF7F0] border border-dashed border-ink/15 text-center text-xs text-ink-muted">
+            <div className="p-3 rounded-lg bg-white/80 border border-dashed border-ink/15 text-center text-xs text-ink-muted">
               No observations recorded yet. Append empirical telemetry below.
             </div>
           )}
@@ -444,7 +444,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
               onChange={(e) => setNewObservation(e.target.value)}
               rows={2}
               placeholder="Log quantitative observations or benchmark readings..."
-              className="w-full rounded-lg bg-[#FAF7F0] border border-ink/10 px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
+              className="w-full rounded-lg bg-white border border-ink/10 px-3 py-1.5 text-xs text-ink-primary focus:outline-none focus:border-royal font-mono"
             />
             <div className="flex justify-end">
               <button
@@ -459,7 +459,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 4: Verbatim Evidence Records */}
-        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
+        <div className="p-4 rounded-xl bg-[#ECFEFF] border border-[#06B6D4]/35 shadow-[0_4px_16px_rgba(6,182,212,0.08)] space-y-3 animate-fade-in-up" style={{ animationDelay: '150ms' }}>
           <div className="flex items-center gap-2">
             <Quote className="w-4 h-4 text-royal" />
             <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
@@ -469,7 +469,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
 
           <div className="space-y-2">
             {evidenceList.map((ev) => (
-              <div key={ev.id} className="p-2.5 rounded-lg bg-[#FAF7F0] border border-ink/8 text-xs space-y-1">
+              <div key={ev.id} className="p-2.5 rounded-lg bg-white/90 border border-ink/8 text-xs space-y-1">
                 <div className="flex items-center justify-between text-[10px] text-ink-muted font-mono">
                   <span className="font-semibold text-ink-secondary truncate max-w-[200px]">{ev.sourceTitle}</span>
                   <span
@@ -491,7 +491,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
             ))}
           </div>
 
-          <div className="space-y-2 p-3 rounded-lg bg-[#FAF7F0] border border-ink/8">
+          <div className="space-y-2 p-3 rounded-lg bg-white/80 border border-ink/8">
             <input
               type="text"
               placeholder="Source Title / Paper Reference..."
@@ -528,7 +528,7 @@ export const DiscoveryLabWorkbench: React.FC = () => {
         </div>
 
         {/* Stage 5: Epistemic Outcome Reconciliation & Graph Connection */}
-        <div className="p-4 rounded-xl bg-[#FCFAF5] border border-ink/12 shadow-card space-y-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+        <div className="p-4 rounded-xl bg-[#F0FDF4] border border-[#10B981]/35 shadow-[0_4px_16px_rgba(16,185,129,0.08)] space-y-3 animate-fade-in-up" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-royal" />

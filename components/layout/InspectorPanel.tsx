@@ -23,6 +23,7 @@ import {
 import { toCanonicalDecision } from '@/types/safety';
 import { isActionPermittedForLab } from '@/lib/safety/safetyClassifier';
 import { RelationshipType } from '@/types/knowledge';
+import { DOMAIN_COLOR_MAP } from '@/components/canvas/nodes/ConceptNode';
 
 export const InspectorPanel: React.FC = () => {
   const {
@@ -245,9 +246,18 @@ export const InspectorPanel: React.FC = () => {
             ) : (
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-royal-subtle text-royal border border-royal/20 font-medium">
-                    {selectedConcept.domainCategory}
-                  </span>
+                  {(() => {
+                    const domColor = DOMAIN_COLOR_MAP[selectedConcept.domainCategory];
+                    return (
+                      <span className={`text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full font-semibold border ${
+                        domColor 
+                          ? `${domColor.pillBg} ${domColor.pillText} ${domColor.pillBorder}`
+                          : 'bg-royal-subtle text-royal border-royal/20'
+                      }`}>
+                        {selectedConcept.domainCategory}
+                      </span>
+                    );
+                  })()}
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={startEditConcept}
