@@ -276,10 +276,10 @@ export const DiscoveryLabWorkbench: React.FC = () => {
                   </span>
                 </div>
                 {idx < STAGES.length - 1 && (
-                  <div className="flex-1 mx-2.5 h-0.5 bg-cream-300 rounded-full overflow-hidden">
+                  <div className="flex-1 mx-2.5 h-1 bg-cream-300 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all duration-300 ${
-                        isCompleted ? 'bg-royal w-full' : 'bg-transparent w-0'
+                      className={`h-full transition-all duration-500 ${
+                        isCompleted ? 'bg-gradient-to-r from-royal via-sky-400 to-royal animate-liquid-bar w-full' : 'bg-transparent w-0'
                       }`}
                     />
                   </div>
@@ -421,11 +421,26 @@ export const DiscoveryLabWorkbench: React.FC = () => {
 
         {/* Stage 3: Telemetry & Observations */}
         <div className="p-4 rounded-xl bg-[#FFF7ED] border border-[#E97942]/35 shadow-[0_4px_16px_rgba(233,121,66,0.08)] space-y-3 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-          <div className="flex items-center gap-2">
-            <Lightbulb className="w-4 h-4 text-tangerine" />
-            <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
-              3. Telemetry & Observations Log
-            </h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-tangerine" />
+              <h3 className="text-xs font-semibold text-ink-primary uppercase tracking-wide">
+                3. Telemetry & Observations Log
+              </h3>
+            </div>
+            {/* Live Oscilloscope Frequency Waveform */}
+            <div className="flex items-end gap-1 h-5 px-2 py-0.5 rounded-md bg-tangerine/10 border border-tangerine/20" title="Live Empirical Waveform Telemetry">
+              {[0.2, 0.7, 0.4, 0.9, 0.5, 0.8, 0.3, 0.6].map((delay, i) => (
+                <span
+                  key={i}
+                  className="w-1 bg-tangerine rounded-full"
+                  style={{
+                    animation: `oscBounce 1.2s ease-in-out infinite`,
+                    animationDelay: `${delay}s`,
+                  }}
+                />
+              ))}
+            </div>
           </div>
 
           {activeInvestigation.experimentPlan.observations ? (

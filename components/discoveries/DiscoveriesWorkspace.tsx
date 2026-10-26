@@ -244,7 +244,11 @@ export const DiscoveriesWorkspace: React.FC = () => {
       </div>
 
       {/* Discovery Grid Feed */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6 relative">
+        {/* Dynamic Sweeping Radar Horizon Beam During Scanning */}
+        {isScanningDiscoveries && (
+          <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-tangerine to-transparent shadow-[0_0_16px_#E97942] z-20 pointer-events-none animate-scan-laser" />
+        )}
         {filteredCandidates.length === 0 ? (
           <div className="text-center py-16 px-4 bg-[#FCFAF5] rounded-xl border border-dashed border-ink/15 max-w-md mx-auto shadow-card animate-fade-in-up">
             <div className="w-10 h-10 rounded-full bg-[#FAF7F0] flex items-center justify-center mx-auto mb-3 text-tangerine border border-ink/10">

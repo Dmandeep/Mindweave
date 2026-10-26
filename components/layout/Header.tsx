@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({ onReplayIntro }) => {
           title="MindWeave — Click to replay intro"
           aria-label="MindWeave home and introduction"
         >
-          <div className="w-7 h-7 rounded-lg overflow-hidden border border-ink/12 flex items-center justify-center bg-[#FAF7F0] shadow-xs group-hover:border-royal/50 group-hover:shadow-card transition-all">
+          <div className="w-7 h-7 rounded-lg overflow-hidden border border-ink/12 flex items-center justify-center bg-[#FAF7F0] shadow-xs group-hover:border-royal/50 group-hover:shadow-[0_0_12px_rgba(49,95,233,0.3)] transition-all">
             <img 
               src="/logo.png" 
               alt="MindWeave Logo" 
@@ -86,8 +86,9 @@ export const Header: React.FC<HeaderProps> = ({ onReplayIntro }) => {
             />
           </div>
           <div className="flex items-baseline space-x-1.5">
-            <span className="font-bold text-xs tracking-tight text-ink font-sans">
+            <span className="font-bold text-xs tracking-tight text-ink font-sans relative">
               Mind<span className="text-royal">Weave</span>
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent bg-clip-text text-transparent opacity-0 group-hover:opacity-100 animate-shimmer pointer-events-none transition-opacity" />
             </span>
             <span className="text-[10px] font-mono text-ink-muted hidden md:inline">
               Weaving Knowledge Into Discovery
@@ -246,12 +247,13 @@ export const Header: React.FC<HeaderProps> = ({ onReplayIntro }) => {
         {onReplayIntro && (
           <button
             onClick={onReplayIntro}
-            className="hidden xl:flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium text-royal bg-royal-subtle hover:bg-royal/15 border border-royal/20 transition-all shadow-2xs active:scale-98"
+            className="hidden xl:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-royal bg-royal-subtle hover:bg-royal/15 border border-royal/25 transition-all shadow-2xs hover:shadow-[0_0_12px_rgba(49,95,233,0.25)] active:scale-95 group"
             title="Replay Brand Introduction Animation"
             aria-label="Replay Brand Intro"
           >
-            <Play className="w-3 h-3 text-royal fill-royal/20" />
+            <Play className="w-3 h-3 text-royal fill-royal/20 group-hover:rotate-12 transition-transform" />
             <span>Intro</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-royal animate-ping" />
           </button>
         )}
 
